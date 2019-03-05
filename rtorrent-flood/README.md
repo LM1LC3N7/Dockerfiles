@@ -13,8 +13,9 @@ Cela permet d'obtenir une image finale bien plus légère avec très peu de couc
 
 Détails à propos de l'image :
 
+* Basé sur `node:10-alpine`
 * 9 couches docker (`layers`)
-* 320Mio, avec les dépendences `npm` nécessaires à `flood`
+* 388Mio, avec les dépendences `npm` nécessaires à `flood`
 * Lancement du service en moins de 10 secondes !
 
 ```bash
