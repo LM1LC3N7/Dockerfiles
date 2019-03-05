@@ -1,0 +1,2 @@
+/app/flood/flood-db true rtorrent:rtorrent,991:991 0600 0700
+/app/flood/config.js true rtorrent:rtorrent,991:991 0600 0700
