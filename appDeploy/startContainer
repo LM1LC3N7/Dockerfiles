@@ -1,0 +1,354 @@
+#!/bin/bash
+
+# Fonction d'affichage de l'aide
+function help() {
+  echo "Utilisation : startContainer [chemin/vers/config.cfg]"
+}
+
+# Récupérer le chemin du script
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Fonction de test des chemins
+function testPath() {
+  if [ "$1" = "" ] ; then echo "Le fichier n'existe pas." ; exit 1 ; fi
+
+  case "$1" in
+    /*) if [ ! -f "$1" ] ; then echo "Le fichier $1 n'existe pas." ; exit 1 ; fi ;;
+    *) if [ ! -f "${SCRIPT_DIR}/$1" ] ; then echo "Le fichier ${SCRIPT_DIR}/$1 n'existe pas." ; exit 1 ; fi ;;
+  esac
+}
+
+# Vérifier l'argument contenant le fichier de configuration
+if [ "${#1}" -lt 1 ] ; then
+  help
+  exit 0
+fi
+# Utiliser le chemin absolu
+CONFIG_FILE="$(readlink -f $1)"
+if [ "${CONFIG_FILE}" = "" ] ; then
+  help
+  exit 1
+else
+  testPath "${CONFIG_FILE}"
+fi
+CONFIG_DIR="$(dirname ${CONFIG_FILE})"
+
+#
+# Configuration
+#
+
+# Import du fichier "config.cfg" pour récupérer les configurations
+. "${CONFIG_FILE}"
+if [ $? -ne 0 ] ; then echo "Erreur lors de l'importation de ${CONFIG_FILE}" ; exit 1 ; fi
+
+# Verifier si toutes les variables sont presentes
+if [ ${#NOM} -le 0 ] ; then echo "Erreur variable NOM incorrecte" ; exit 1 ; fi
+if [ ${#IMAGE} -le 0 ] ; then echo "Erreur variable IMAGE incorrecte" ; exit 1 ; fi
+if [ ${#BUILD_PATH} -le 0 ] ; then BUILD_PATH="" ; fi
+if [ ${#TAG} -le 0 ] ; then TAG="latest" ; fi
+if [ ${#LABEL} -le 0 ] ; then LABEL="" ; fi
+if [ ${#LOCALTIME} -le 0 ] ; then LOCALTIME=true ; fi
+if [ "${LOCALTIME}" != "true" ] && [ "${LOCALTIME}" != "false" ] ; then LOCALTIME=true ; fi
+if [ ${#INTERACTIVE} -le 0 ] ; then INTERACTIVE=false ; fi
+if [ "${INTERACTIVE}" != "true" ] && [ "${INTERACTIVE}" != "false" ] ; then INTERACTIVE=false ; fi
+if [ ${#TTY} -le 0 ] ; then TTY=false ; fi
+if [ "${TTY}" != "true" ] && [ "${TTY}" != "false" ] ; then TTY=false ; fi
+if [ ${#DETACH} -le 0 ] ; then DETACH=true ; fi
+if [ "${DETACH}" != "true" ] && [ "${DETACH}" != "false" ] ; then DETACH=true ; fi
+if [ ${#RESTART} -le 0 ] ; then RESTART=no ; fi
+if [ ${#STOPTIMEOUT} -le 0 ] ; then STOPTIMEOUT=10 ; fi
+case ${STOPTIMEOUT} in
+  ''|*[!0-9]*) STOPTIMEOUT=10 ;;
+  *) ;;
+esac
+if [ ${#NBCPUS} -le 0 ] ; then NBCPUS= ; echo "Le CPU ne sera PAS limité." ; fi
+case ${NBCPUS} in
+  ''|*[!0-9.]*) NBCPUS= ; echo "Le CPU ne sera PAS limité." ;;
+  *) ;;
+esac
+if [ ${#MEM} -le 0 ] ; then MEM=0 ; echo "La RAM ne sera PAS limitée." ; fi
+if [ ${#MEMSWAP} -le 0 ] ; then MEMSWAP=0 ; echo "Le SWAP ne sera PAS limité." ; fi
+if [ ${#MEMSWAPPINESS} -le 0 ] ; then MEMSWAPPINESS=0 ; echo "Le cache ne sera PAS limité." ; fi
+if [ ${#VOLUMES} -le 0 ] ; then VOLUMES=() ; fi
+if [ ${#ENVS} -le 0 ] ; then ENVS=("") ; fi
+if [ ${#ENVFILE} -gt 0 ] ; then
+  if [ ! -f ${CONFIG_DIR}/${ENVFILE} ] ; then
+    echo "Le fichier des variables d'environnement n'existe pas.";
+    exit 1
+  fi
+fi
+if [ ${#NETWORKS} -le 0 ] ; then echo "Erreur variable NETWORKS incorrecte" ; exit 1 ; fi
+if [ ${#LINKS} -le 0 ] ; then LINKS=("") ; fi
+if [ ${#PORTS} -le 0 ] ; then PORTS=("") ; fi
+if [ ${#ENTRYPOINT} -le 0 ] ; then ENTRYPOINT="" ; fi
+if [ ${#CAPS} -le 0 ] ; then CAPS=("") ; fi
+if [ ${#BONUS_CMD} -le 0 ] ; then BONUS_CMD=("") ; fi
+
+#
+# 1 - Vérifier si l'image existe localement, ou en ligne, ou faire appel au fichier
+#     "build/Dockerfile"
+#
+function docker_tag_exists() {
+  # Source: https://stackoverflow.com/a/50945459
+  curl --silent -f -lSL https://hub.docker.com/v2/repositories/$1/tags/$2 > /dev/null 2>&1
+}
+
+printf "[*] Vérification si l'image existe localement..."
+TEST=$(docker images -q ${IMAGE}:${TAG})
+IMAGE_EXIST=false
+if [ ${#TEST} -le 0 ] ; then
+  echo " [ERROR]"
+  IMAGE_EXIST=false
+else
+  echo " [OK]"
+  IMAGE_EXIST=true
+fi
+if [ ${IMAGE_EXIST} != true ] ; then
+  if [ ${#BUILD_PATH} -gt 0 ] ; then
+    BUILD_PATH=$(readlink -f ${BUILD_PATH})
+    echo "[*] Création de l'image ${IMAGE}:${TAG} avec le Dockerfile du dossier ${BUILD_PATH}"
+    ${SCRIPT_DIR}/startContainer-build ${CONFIG_FILE}
+    if [ $? -ne 0 ] ; then
+      echo "Création de l'image${IMAGE}:${TAG} ... [ERROR]"
+      exit $?
+    else
+      echo "Création de l'image${IMAGE}:${TAG} ... [SUCCESS]"
+    fi
+  else
+    printf "[*] Vérification si l'image existe sur hub.docker.com..."
+    if docker_tag_exists ${IMAGE}:${TAG}; then
+      echo " [OK]"
+      printf "[*] Téléchargement de l'image depuis hub.docker.com..."
+      docker pull ${IMAGE}:${TAG}
+    else
+      echo " [ERROR]"
+      exit 1
+    fi
+  fi
+fi
+
+
+#
+# Catch le CTRL+C
+#
+trap ctrl_c INT
+
+function ctrl_c() {
+  echo "[*] Arrêt du script."
+  exit 1
+}
+
+#
+# 2 - Vérifier si un conteneur avec le même nom tourne
+#     et proposer de stopper + suppr
+docker container inspect ${NOM} > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+  echo "[*] /!\\ Un conteneur existe avec le nom \"${NOM}\"."
+  echo "[*] Arrêt et suppression dans 3 secondes (CTRL+C pour annuler) ..."
+  sleep 3
+  echo "[*] Arrêt du conteneur \"${NOM}\"."
+  docker stop ${NOM}
+  docker rm -f ${NOM}
+fi
+
+#
+# 3 - Vérifier si les volumes existent ou les créer
+#
+
+for VOLUME in "${VOLUMES[@]}" ; do
+  # Vérifier si le volume est un chemin ou un volume docker
+  if [ "${VOLUME:0:1}" != "/" ] ; then
+    # Séparer le nom des permissions et conserver le nom du volume docker
+    VOLUME=${VOLUME%%:*}
+    VOLUME=${VOLUME%%/*}
+    # Chercher le volume ou le créer
+    printf "[*] Vérification du volume ${VOLUME}... "
+    docker volume inspect ${VOLUME} > /dev/null 2>&1
+    if [ $? -gt 0 ] ; then
+      # Volume inexistant, création
+      docker volume create ${VOLUME} > /dev/null 2>&1
+      if [ $? -eq 0 ] ; then echo "[Créé]" ; else echo "[Erreur] - Impossible de le créer." ; exit 1 ; fi
+    else
+      echo "[OK]"
+    fi
+  fi
+done
+
+
+#
+# 4 - Vérifier ou créer tous les réseaux
+#
+for NETWORK in "${NETWORKS[@]}" ; do
+  # Chercher le réseau ou le créer
+  printf "[*] Vérification du réseau ${NETWORK}... "
+  docker network inspect ${NETWORK} > /dev/null 2>&1
+  if [ $? -gt 0 ] ; then
+    # Réseau inexistant, création
+    docker network create ${NETWORK} > /dev/null 2>&1
+    if [ $? -eq 0 ] ; then echo "[Créé]" ; else echo "[Erreur]" ; exit 1 ; fi
+  else
+    echo "[OK]"
+  fi
+done
+
+#
+# 5 - Lancer
+#
+# Création de la commande dans un fichier temporaire
+FILE="/tmp/startContainer"
+touch ${FILE}
+if [ $? -ne 0 ] ; then echo "Impossible de créer un fichier temporaire ${FILE}." ; exit 1 ; fi
+echo "docker create \\" > ${FILE}
+# Interactif
+if [ "${INTERACTIVE}" = "true" ] ; then
+  echo "  --interactive \\" >> ${FILE}
+fi
+# Alouer un shell
+if [ "${TTY}" = "true" ] ; then
+  echo "  --tty \\" >> ${FILE}
+fi
+# Supprimer si arrêté
+if [ "${REMOVE}" = "true" ] ; then
+  echo ="  --rm \\" >> ${FILE}
+fi
+# Ajouter les labels
+for LABEL in "${LABELS[@]}" ; do
+  if [ "${#LABEL}" -gt 0 ] ; then
+    echo "  --label \"${LABEL}\" \\" >> ${FILE}
+  fi
+done
+# Nom
+echo "  --name=\"${NOM}\" \\" >> ${FILE}
+# Redemarrage
+echo "  --restart=${RESTART} \\" >> ${FILE}
+# Temps d'arrêt du conteneur
+echo "  --stop-timeout=${STOPTIMEOUT} \\" >> ${FILE}
+# Synchro du temps
+if [ "${LOCALTIME}" = "true" ] ; then
+  echo "  --volume /etc/localtime:/etc/localtime:ro \\" >> ${FILE}
+fi
+# Ajouter tous les volumes
+for VOLUME in "${VOLUMES[@]}" ; do
+  if [ ${#VOLUME} -gt 0 ] ; then
+    echo "  --volume ${VOLUME} \\" >> ${FILE}
+  fi
+done
+# Ressources
+if [ ${#NBCPUS} -gt 0 ] ; then
+  echo "  --cpus=${NBCPUS} \\" >> ${FILE}
+fi
+if [ ${#MEM} -gt 0 ] ; then
+  echo "  --memory=${MEM} \\" >> ${FILE}
+fi
+if [ ${#MEMSWAP} -gt 0 ] ; then
+  echo "  --memory-swap=${MEMSWAP} \\" >> ${FILE}
+fi
+if [ ${#MEMSWAPPINESS} -gt 0 ] ; then
+  echo "  --memory-swappiness=${MEMSWAPPINESS} \\" >> ${FILE}
+fi
+# Ajouter toutes les variables d'env
+for ENV in "${ENVS[@]}" ; do
+  if [ ${#ENV} -gt 0 ] ; then
+    echo "  --env \"${ENV}\" \\" >> ${FILE}
+  fi
+done
+if [ ${#ENVFILE} -gt 0 ] ; then
+  echo "  --env-file ${CONFIG_DIR}/${ENVFILE} \\" >> ${FILE}
+fi
+# Ajouter tous les reseaux
+if [ "${PORTS[0]}" = "ALL" ] ; then
+  echo "  --publish-all \\" >> ${FILE}
+else
+  for PORT in "${PORTS[@]}" ; do
+    if [ ${#PORT} -gt 0 ] ; then
+      echo "  --publish ${PORT} \\" >> ${FILE}
+    fi
+  done
+fi
+# Attacher un seul réseau
+if [ "${#NETWORKS[0]}" -gt 0 ] ; then
+  echo "  --network=${NETWORKS[0]} \\" >> ${FILE}
+fi
+# Utiliser "--cap-drop=all --cap-add=<boucle sur $CAP>"
+if [ "${CAPS[0]}" != "DEFAULT" ] ; then
+  echo "  --cap-drop=all \\" >> ${FILE}
+fi
+if [ "${#CAPS[0]}" -gt 0 ] ; then
+  for CAP in "${CAPS[@]}" ; do
+    if [ "${CAP}" != "DEFAULT" ] ; then
+      echo "  --cap-add=${CAP} \\" >> ${FILE}
+    fi
+  done
+fi
+# Ajouter les liens reseaux (link)
+for LINK in "${LINKS[@]}" ; do
+  if [ ${#LINK} -gt 0 ] ; then
+    echo "  --link ${LINK} \\" >> ${FILE}
+  fi
+done
+# Commandes bonus
+for CMD in "${BONUS_CMD[@]}" ; do
+  if [ ${#CMD} -gt 0 ] ; then
+    echo "  ${CMD} \\" >> ${FILE}
+  fi
+done
+# Image de départ
+echo "  ${IMAGE}:${TAG} \\" >> ${FILE}
+# Entrypoint
+if [ ${#ENTRYPOINT} -gt 0 ] ; then
+  echo "  ${ENTRYPOINT} \\" >> ${FILE}
+fi
+
+echo "[*] Création du conteneur \"${NOM}\""
+cat ${FILE}
+sh ${FILE}
+if [ $? -ne 0 ] ; then
+  echo "[*] Une erreur a été détectée (docker create)."
+  exit 1
+fi
+rm ${FILE} 2>&1
+
+# Ajout des réseaux
+if [ "${#NETWORKS[1]}" -gt 0 ] ; then
+  for NETWORK in "${NETWORKS[@]}" ; do
+    printf "[*] Ajout du réseau ${NETWORK}... "
+    docker network inspect ${NETWORK} > /dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      docker network create ${NETWORK}
+      echo "[Créé]"
+      docker network connect ${NETWORK} ${NOM}
+    else
+      docker network connect ${NETWORK} ${NOM}
+      echo "[OK]"
+    fi
+  done
+fi
+
+echo "[*] Démarrage du conteneur \"${NOM}\""
+docker start ${NOM}
+if [ $? -ne 0 ] ; then
+  echo "[*] Une erreur a été détectée (docker start)."
+  exit 1
+fi
+
+#
+# Arrêter de catch le CTRL+C
+#
+trap ctrl_c_end INT
+
+function ctrl_c_end() {
+  exit 0
+}
+
+
+
+# Avec Docker create, un conteneur est détaché par défaut
+if [ "${DETACH}" != "true" ] ; then
+  docker attach ${NOM}
+else
+  # Afficher les logs
+  echo "[*] Affichage des logs."
+  docker logs -f ${NOM}
+fi
+
+exit 0

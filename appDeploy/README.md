@@ -1,0 +1,29 @@
+# Start a Docker container from a config file
+
+This script will parse the config file, pull or create the image, stop and remove any previous container with the same name and create a new one.
+The script can automatically build a local image based on a path provided in the config file.
+
+
+## Installation
+
+```bash
+cd
+git clone https://github.com/LM1LC3N7/Dockerfiles
+cp Dockerfiles/appDeploy/startContainer* /usr/local/bin/
+chmod a-rw /usr/local/bin/startContainer*
+chmod a+x /usr/local/bin/startContainer*
+```
+
+## Usage
+
+```bash
+startContainer relative/path/to/config.cfg
+```
+
+And
+
+```bash
+startContainer /full/path/to/config.cfg
+```
+
+`startContainer-build` will automatically be used by `startContainer`.
