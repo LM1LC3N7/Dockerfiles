@@ -14,9 +14,18 @@ Cela permet d'obtenir une image finale bien plus légère avec très peu de couc
 Détails à propos de l'image :
 
 * Basé sur `node:10-alpine`
-* 9 couches docker (`layers`)
+* 6 couches docker (`layers`)
 * 388Mio, avec les dépendences `npm` nécessaires à `flood`
 * Lancement du service en moins de 10 secondes !
+
+Nombres de couches docker :
+
+```bash
+$> docker image inspect lmilcent/flood:latest -f '{{.RootFS.Layers}}' | wc -w
+6
+```
+
+Créer l'image :
 
 ```bash
 docker build -t lmilcent/flood .
