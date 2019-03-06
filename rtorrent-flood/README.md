@@ -46,7 +46,7 @@ Le conteneur est lancé avec différentes options :
 
 
 ```bash
-docker create \
+docker run \
   --tty \
   --name="flood" \
   --restart=unless-stopped \
