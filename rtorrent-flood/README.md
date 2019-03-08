@@ -6,8 +6,11 @@ Ce conteneur contient `rtorrent` dans sa dernière version 0.9.7-r1 ([packages a
 L'interface utilisée est [jfurrow/flood](https://github.com/jfurrow/flood), dans sa dernière version disponible sur la branche `master`.
 
 
+
 ## Création de l'image
 
+L'image récupère automatiquement la dernière `release` de [Ghost](https://ghost.org/fr/) et de [s6-overlay](https://github.com/just-containers/s6-overlay) pendant la création.
+  
 L'image est créée en deux étapes (avec le `multi-stage`) pour compiler les dépendences dans une première image, puis récupérer seulement les fichiers.
 Cela permet d'obtenir une image finale bien plus légère avec très peu de couches (`layers`).
 
