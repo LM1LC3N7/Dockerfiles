@@ -12,7 +12,7 @@ Détails à propos de l'image :
 
 * Basée sur `node:10-alpine`
 * 7 couches docker (`layers`)
-* 287Mio, avec les dépendences `npm` nécessaires à `ghost`
+* 284Mio, avec les dépendences `npm` nécessaires à `ghost`
 * Lancement du service en moins de 10 secondes !
 
 Nombres de couches docker :
@@ -22,7 +22,8 @@ $> docker image inspect lmilcent/ghost:latest -f '{{.RootFS.Layers}}' | wc -w
 7
 ```
 
-Créer l'image :
+Avant de créer l'image, modifier la configuration de Ghost en fonction des besoins dans le fichier `rootfs/ghost/content/ghost.conf`.
+Documentation officielle : https://docs.ghost.org/concepts/config/
 
 ```bash
 docker build -t lmilcent/ghost .
@@ -35,7 +36,7 @@ Le conteneur est lancé avec différentes options :
 
 * Redémarrage automatique en cas de plantage
 * Modification de la configuration de `ghost` avec les variables d'environnement
-* Limitation des performances (2 CPUs, 1Gio de RAM, aucun SWAP)
+* Limitation des performances (2 CPUs, 512Mio de RAM, aucun SWAP)
 * Limitation des autorisations ("Capabilities")
 * Fonctionnement en mode utilisateur standard (pas de `root`)
 * Interconnexion avec [jwilder/nginx-proxy](https://github.com/jwilder/nginx-proxy)
@@ -62,34 +63,22 @@ docker run \
   --cap-add=fowner \
   --cap-add=setgid \
   --cap-add=setuid \
-  lmilcent/ghost:alpine
+  lmilcent/ghost
 ```
 
 **ghost.env**
 
 ```bash
 ## Nginx + companion
-VIRTUAL_HOST=blog.lmilcent.com
+VIRTUAL_HOST=sub.domain.com
 VIRTUAL_PORT=2368
 VIRTUAL_PROTO=http
-LETSENCRYPT_HOST=blog.lmilcent.com 
-LETSENCRYPT_EMAIL=louis@lmilcent.com
+LETSENCRYPT_HOST=sub.domain.com 
+LETSENCRYPT_EMAIL=my@email.com
 
 ## Ghost
 NODE_ENV=production
 
 # https://docs.ghost.org/concepts/config/
 url=https://blog.lmilcent.com
-mail__transport=SMTP 
-mail__from=blog@lmilcent.com 
-mail__options__service=sparkpost 
-mail__options__auth__user=SMTP_Injection 
-mail__options__auth__pass=TOKEN 
-server__host=0.0.0.0
-server__port=2368
-logging__level=info 
-imageOptimization__resize=true
-compress=true 
-preloadHeaders=true
-sendWelcomeEmail=true
 ```
