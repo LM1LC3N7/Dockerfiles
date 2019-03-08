@@ -1,7 +1,7 @@
 # Ghost
 
 Ce conteneur contient [Ghost](https://ghost.org) dans sa dernière version disponible sur [GitHub](https://github.com/TryGhost/Ghost/releases).
-
+L'image récupère automatiquement la dernière `release` de [Ghost](https://ghost.org/fr/) et de [s6-overlay](https://github.com/just-containers/s6-overlay) pendant la création.
 
 ## Création de l'image
 
