@@ -1,5 +1,4 @@
 #!/usr/bin/with-contenv sh
 cd /ghost
-echo $env
 echo "[*] Starting Ghost"
 exec s6-setuidgid ghost /usr/local/bin/node index
