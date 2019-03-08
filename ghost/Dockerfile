@@ -68,12 +68,7 @@ COPY --from=ghost-build /tmp /tmp
 COPY rootfs /
 
 ENV S6_FIX_ATTRS_HIDDEN=1 \
-    NODE_ENV=production \
-    GHOST_URL=https://blog.lmilcent.com \
-    GHOST_HOST=0.0.0.0 \
-    GHOST_COMPRESS=true \
-    GHOST_IMG_RESIZE=true \
-    GHOST_LOG_LEVEL=debug
+    NODE_ENV=production
 
 RUN echo \
  && echo "[*] Updating OS" \
