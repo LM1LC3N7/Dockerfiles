@@ -1,6 +1,0 @@
-#!/bin/sh
-HOME=/app/flood
-cd /app/flood
-
-exec s6-setuidgid rtorrent /usr/local/bin/node server/bin/start.js
-#exec s6-applyuidgid -u 991 -g 991 /usr/local/bin/node server/bin/start.js
