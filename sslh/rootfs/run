@@ -1,0 +1,35 @@
+#!/usr/bin/with-contenv sh
+
+# Init
+echo "-----------------------------------------------"
+echo ""
+echo "  | |           (_)| |                   | |"
+echo "  | | _ __ ___   _ | |  ___   ___  _ __  | |_"
+echo "  | || '_ \ _ \ | || | / __| / _ \| '_ \ | __|"
+echo "  | || | | | | || || || (__ |  __/| | | || |_"
+echo "  |_||_| |_| |_||_||_| \___| \___||_| |_| \__|"
+echo ""
+echo "-----------------------------------------------"
+echo " Application : sslh"
+echo " Running user: app"
+echo " Base OS     : Alpine"
+echo "-----------------------------------------------"
+echo " SSLH configuration"
+echo "   - Listen     : ${LISTEN_IP}:${LISTEN_PORT}"
+echo "   - SSH        : ${SSH_HOST}:${SSH_PORT}"
+echo "   - SSL        : ${HTTPS_HOST}:${HTTPS_PORT}"
+echo "   - OpenVPN    : ${OPENVPN_HOST}:${OPENVPN_PORT}"
+echo "   - SHADOWSOCKS: ${SHADOWSOCKS_HOST}:${SHADOWSOCKS_PORT}"
+echo "-----------------------------------------------"
+
+# Applying perms
+setcap CAP_SETGID,CAP_NET_BIND_SERVICE,CAP_SETUID=+eip /usr/sbin/sslh-fork
+
+# Start SSLH with lower rights
+exec s6-setuidgid app \
+   sslh -f -u root --listen ${LISTEN_IP}:${LISTEN_PORT} \
+      --ssh ${SSH_HOST}:${SSH_PORT} \
+      --ssl ${HTTPS_HOST}:${HTTPS_PORT} \
+      --openvpn ${OPENVPN_HOST}:${OPENVPN_PORT} \
+      --anyprot ${SHADOWSOCKS_HOST}:${SHADOWSOCKS_PORT} \
+      $@
