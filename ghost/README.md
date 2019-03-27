@@ -1,32 +1,32 @@
 # Ghost
 
 Ce conteneur contient [Ghost](https://ghost.org) dans sa dernière version disponible sur [GitHub](https://github.com/TryGhost/Ghost/releases).
-L'image récupère automatiquement la dernière `release` de [Ghost](https://ghost.org/fr/) et de [s6-overlay](https://github.com/just-containers/s6-overlay) pendant la création.
+L'image récupère automatiquement la dernière `release` de [Ghost](https://ghost.org/fr/).
 
 ## Création de l'image
 
 L'image est créée en deux étapes (avec le `multi-stage`) pour compiler les dépendences dans une première image, puis récupérer seulement les fichiers.
-Cela permet d'obtenir une image finale bien plus légère avec très peu de couches (`layers`).
+Cela permet d'obtenir une image finale bien plus légère avec très peu de couches (`layers`) en se basant sur Distoless.
 
 Détails à propos de l'image :
 
-* Basée sur `node:10-alpine`
-* 7 couches docker (`layers`)
-* 284Mio, avec les dépendences `npm` nécessaires à `ghost`
-* Lancement du service en moins de 10 secondes !
+* Basée sur `distroless`
+* 8 couches docker (`layers`)
+* 220Mio, avec les dépendences `npm` nécessaires à `ghost` et le thème supplémentaire `caffeine`
+* Lancement du service en moins de 8 secondes !
 
 Nombres de couches docker :
 
 ```bash
-$> docker image inspect lmilcent/ghost:latest -f '{{.RootFS.Layers}}' | wc -w
-7
+$> docker image inspect lmilcent/ghost:distroless -f '{{.RootFS.Layers}}' | wc -w
+8
 ```
 
 Avant de créer l'image, modifier la configuration de Ghost en fonction des besoins dans le fichier `rootfs/ghost/content/ghost.conf`.
 Documentation officielle : https://docs.ghost.org/concepts/config/
 
 ```bash
-docker build -t lmilcent/ghost .
+docker build -t lmilcent/ghost:distroless .
 ```
 
 
@@ -34,13 +34,10 @@ docker build -t lmilcent/ghost .
 
 Le conteneur est lancé avec différentes options :
 
-* Redémarrage automatique en cas de plantage
 * Modification de la configuration de `ghost` avec les variables d'environnement
 * Limitation des performances (2 CPUs, 512Mio de RAM, aucun SWAP)
 * Limitation des autorisations ("Capabilities")
-* Fonctionnement en mode utilisateur standard (pas de `root`)
-* Interconnexion avec [jwilder/nginx-proxy](https://github.com/jwilder/nginx-proxy)
-* TODO: Utiliser Traefik
+* Interconnexion avec Traefik
 
 
 ```bash
@@ -63,22 +60,19 @@ docker run \
   --cap-add=fowner \
   --cap-add=setgid \
   --cap-add=setuid \
-  lmilcent/ghost
+  lmilcent/ghost:distroless
 ```
 
 **ghost.env**
 
 ```bash
-## Nginx + companion
-VIRTUAL_HOST=sub.domain.com
-VIRTUAL_PORT=2368
-VIRTUAL_PROTO=http
-LETSENCRYPT_HOST=sub.domain.com 
-LETSENCRYPT_EMAIL=my@email.com
-
 ## Ghost
 NODE_ENV=production
 
 # https://docs.ghost.org/concepts/config/
 url=https://blog.lmilcent.com
+database__connection__host=ghost-db
+database__connection__user=ghost
+database__connection__password=ghostPassword-ToChange
+database__connection__database=ghost
 ```
