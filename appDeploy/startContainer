@@ -8,6 +8,9 @@ function help() {
 # Récupérer le chemin du script
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# Récupérer le répertoire courant (lancement)
+STARTUP_DIR="$(dirname \"$(readlink -f \\"$0\\")\")"
+
 # Fonction de test des chemins
 function testPath() {
   if [ "$1" = "" ] ; then echo "Le fichier n'existe pas." ; exit 1 ; fi
@@ -20,7 +23,10 @@ function testPath() {
 
 # Vérifier l'argument contenant le fichier de configuration
 if [ "${#1}" -lt 1 ] ; then
-  help
+  # Try with default filename: config.cfg
+  echo "Trying: startContainer ${STARTUP_DIR}/config.cfg"
+  startContainer ${STARTUP_DIR}/config.cfg
+  echo exit
   exit 0
 fi
 # Utiliser le chemin absolu
@@ -40,13 +46,12 @@ CONFIG_DIR="$(dirname ${CONFIG_FILE})"
 # Import du fichier "config.cfg" pour récupérer les configurations
 . "${CONFIG_FILE}"
 if [ $? -ne 0 ] ; then echo "Erreur lors de l'importation de ${CONFIG_FILE}" ; exit 1 ; fi
-
 # Verifier si toutes les variables sont presentes
 if [ ${#NOM} -le 0 ] ; then echo "Erreur variable NOM incorrecte" ; exit 1 ; fi
 if [ ${#IMAGE} -le 0 ] ; then echo "Erreur variable IMAGE incorrecte" ; exit 1 ; fi
 if [ ${#BUILD_PATH} -le 0 ] ; then BUILD_PATH="" ; fi
 if [ ${#TAG} -le 0 ] ; then TAG="latest" ; fi
-if [ ${#LABEL} -le 0 ] ; then LABEL="" ; fi
+if [ ${#LABELS} -le 0 ] ; then LABELS=("") ; fi
 if [ ${#LOCALTIME} -le 0 ] ; then LOCALTIME=true ; fi
 if [ "${LOCALTIME}" != "true" ] && [ "${LOCALTIME}" != "false" ] ; then LOCALTIME=true ; fi
 if [ ${#INTERACTIVE} -le 0 ] ; then INTERACTIVE=false ; fi
@@ -77,7 +82,7 @@ if [ ${#ENVFILE} -gt 0 ] ; then
     exit 1
   fi
 fi
-if [ ${#NETWORKS} -le 0 ] ; then echo "Erreur variable NETWORKS incorrecte" ; exit 1 ; fi
+if [ ${#NETWORKS} -le 0 ] ; then NETWORKS=("") ; fi
 if [ ${#LINKS} -le 0 ] ; then LINKS=("") ; fi
 if [ ${#PORTS} -le 0 ] ; then PORTS=("") ; fi
 if [ ${#ENTRYPOINT} -le 0 ] ; then ENTRYPOINT="" ; fi
@@ -115,15 +120,20 @@ if [ ${IMAGE_EXIST} != true ] ; then
       echo "Création de l'image${IMAGE}:${TAG} ... [SUCCESS]"
     fi
   else
-    printf "[*] Vérification si l'image existe sur hub.docker.com..."
-    if docker_tag_exists ${IMAGE}:${TAG}; then
-      echo " [OK]"
-      printf "[*] Téléchargement de l'image depuis hub.docker.com..."
-      docker pull ${IMAGE}:${TAG}
-    else
-      echo " [ERROR]"
-      exit 1
-    fi
+#    printf "[*] Vérification si l'image existe sur hub.docker.com..."
+#    if docker_tag_exists ${IMAGE}:${TAG}; then
+#      echo " [OK]"
+      echo "[*] Téléchargement de l'image depuis hub.docker.com..."
+      docker pull ${IMAGE}:${TAG} 2> /dev/null
+      if [ $? -ne 0 ] ; then
+        echo " [ERROR]"
+      else
+        echo " [OK]"
+      fi
+#    else
+#      echo " [ERROR]"
+#      exit 1
+#    fi
   fi
 fi
 
@@ -178,18 +188,20 @@ done
 #
 # 4 - Vérifier ou créer tous les réseaux
 #
-for NETWORK in "${NETWORKS[@]}" ; do
-  # Chercher le réseau ou le créer
-  printf "[*] Vérification du réseau ${NETWORK}... "
-  docker network inspect ${NETWORK} > /dev/null 2>&1
-  if [ $? -gt 0 ] ; then
-    # Réseau inexistant, création
-    docker network create ${NETWORK} > /dev/null 2>&1
-    if [ $? -eq 0 ] ; then echo "[Créé]" ; else echo "[Erreur]" ; exit 1 ; fi
-  else
-    echo "[OK]"
-  fi
-done
+if [ ${#NETWORKS} -gt 0 ] ; then
+  for NETWORK in "${NETWORKS[@]}" ; do
+    # Chercher le réseau ou le créer
+    printf "[*] Vérification du réseau ${NETWORK}... "
+    docker network inspect ${NETWORK} > /dev/null 2>&1
+    if [ $? -gt 0 ] ; then
+      # Réseau inexistant, création
+      docker network create ${NETWORK} > /dev/null 2>&1
+      if [ $? -eq 0 ] ; then echo "[Créé]" ; else echo "[Erreur]" ; exit 1 ; fi
+    else
+      echo "[OK]"
+    fi
+  done
+fi
 
 #
 # 5 - Lancer
