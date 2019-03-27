@@ -16,6 +16,14 @@ sudo chmod a-rwx,a+x,u+rx,g+rx /usr/local/bin/startContainer*
 
 ## Usage
 
+If no config file is passed as an argument, the script will try to find `config.cfg` into the current folder.
+
+```bash
+startContainer
+```
+
+Or
+
 ```bash
 startContainer relative/path/to/config.cfg
 ```
