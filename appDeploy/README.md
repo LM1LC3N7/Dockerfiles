@@ -10,7 +10,7 @@ The script can automatically build a local image based on a path provided in the
 cd
 git clone https://github.com/LM1LC3N7/Dockerfiles
 sudo cp Dockerfiles/appDeploy/startContainer* /usr/local/bin/
-sudo chown USER /usr/local/bin/startContainer*
+sudo chown ${USER} /usr/local/bin/startContainer*
 sudo chmod a-rwx,a+x,u+rx,g+rx /usr/local/bin/startContainer*
 ```
 
