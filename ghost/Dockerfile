@@ -8,17 +8,14 @@
 # ----- Building ghost -----
 #
 
-FROM node:10-alpine as ghost-build
+FROM node:8-stretch as build
 
 RUN echo \
  && echo "[*] Installing ghost dependencies" \
- && apk add --no-cache \
-    python curl gcc make git zip \
- && addgroup -g 991 ghost \
- && adduser -S -D -u 991 -g ghost --home=/ghost ghost \
- && chown ghost:ghost /ghost
+ && apt-get update && apt-get install -y \
+    python curl gcc make git zip unzip bash
 
-USER ghost
+SHELL ["/bin/bash", "-c"]
 
 RUN echo \
  && echo "[*] Searching the last release version of ghost from GitHub" \
@@ -43,60 +40,46 @@ RUN echo \
  && tar xzf /tmp/${CASPER_VER}.tar.gz -C /ghost/content/themes/ \
  && rm -f /tmp/${CASPER_VER}.tar.gz \
  && rm -rf /ghost/content/themes/casper \
- && mv /ghost/content/themes/Casper-${CASPER_VER:1} /ghost/content/themes/casper \
+ && mv /ghost/content/themes/Casper-${CASPER_VER} /ghost/content/themes/casper \
  && echo \
- && echo "[*] Searching the last release version of s6-overlay from GitHub" \
- && S6_VER=$(curl --silent "https://api.github.com/repos/just-containers/s6-overlay/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') \
+ && echo "[*] Searching the last release version of the caffeine theme from GitHub" \
+ && CAFFEINE_VER=$(curl --silent "https://api.github.com/repos/kelyvin/caffeine-theme/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') \
  && echo \
- && echo "[*] Downloading s6-overlay version ${S6_VER} from github" \
- && cd /tmp && wget -q https://github.com/just-containers/s6-overlay/releases/download/${S6_VER}/s6-overlay-amd64.tar.gz \
+ && echo "[*] Downloading caffeine theme version ${CAFFEINE_VER} from github" \
+ && cd /tmp && wget -q https://github.com/kelyvin/caffeine-theme/releases/download/${CAFFEINE_VER}/caffeine-theme-${CAFFEINE_VER}.zip \
+ && echo \
+ && echo "[*] Installing caffeine theme" \
+ && unzip -q /tmp/caffeine-theme-${CAFFEINE_VER}.zip -d /tmp/ \
+ && mv caffeine-theme-${CAFFEINE_VER} /ghost/content/themes/ \
+ && rm -rf /tmp/* \
  && echo \
  && echo "[*] ----- FIRST STAGE FINISHED -----" \
  && echo \
- && echo "[*] Importing files (UID=991, GID=991) from first docker build stage to second" \
- && echo "NOTICE: It could be long as there is $(find /ghost -type f | wc -l) files, approx. 200Mio)." && echo
+ && echo "[*] Importing files from first docker build stage to second" \
+ && echo
 
 
 #
 # Stage 2:
 # ----- Creating final image -----
 #
-FROM node:10-alpine
+FROM gcr.io/distroless/nodejs
 
-COPY --chown=991:991 --from=ghost-build /ghost /ghost
-COPY --from=ghost-build /tmp /tmp
-COPY rootfs /
-
-ENV S6_FIX_ATTRS_HIDDEN=1 \
+ENV HOME=/ghost \
     NODE_ENV=production
 
-RUN echo \
- && echo "[*] Updating OS" \
- && apk -U upgrade \
- && echo \
- && echo "[*] Installing s6-overlay" \
- && tar xzf /tmp/s6-overlay-amd64.tar.gz -C / \
- && rm -f /tmp/s6-overlay-amd64.tar.gz \
- && echo \
- && echo "[*] Cleaning" \
- && rm -rf /var/cache/apk/* /tmp/* \
- && echo \
- && echo "[*] Creating \"ghost\" user" \
- && addgroup -g 991 ghost \
- && adduser -S -D -u 991 -g ghost --home=/ghost ghost \
- && echo \
- && echo "[*] Applying rights" \
- && echo "NOTICE: It could be long as there is $(find /ghost -type f | wc -l) files, approx. 340Mio)." \
- && cd /ghost/content \
- && cp ghost.conf /ghost/config.development.json \
- && cp ghost.conf /ghost/config.production.json \
- && find /ghost \! -user ghost -exec chown ghost:ghost {} \;
+COPY --from=build /ghost /ghost
+COPY --from=build /tmp /tmp
+COPY rootfs/ghost/ghost-distroless.conf /ghost/config.production.json
+COPY rootfs/ghost/ghost-distroless.conf /ghost/config.development.json
+
+WORKDIR /ghost
 
 VOLUME /ghost/content
 
 EXPOSE 2368
 
-LABEL description="Ghost blog using s6-overlay" \
+LABEL description="Ghost blog on distroless" \
       maintainer="Louis MILCENT <louis@lmilcent.com>"
 
-ENTRYPOINT ["/init"]
+CMD ["index"]
