@@ -1,6 +1,6 @@
 # Dockerfiles
 
-## Distroless
+## Base images
 
 When it is possible and I technicaly succeed, docker images are based on [distroless](https://github.com/GoogleContainerTools/distroless) (see lines with this tag: <kbd>distroless</kbd>).
 
