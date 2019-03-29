@@ -19,6 +19,17 @@ Some resources:
 * [`flood`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/flood) : A clean web interface for `rtorrent` ([flood](https://github.com/jfurrow/flood)). <kbd>Distroless</kbd>
 * [`sslh`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/sslh) : Applicative protocol multiplexer ([sslh](https://github.com/yrutschle/sslh)) usefull to use the 443 port with multiple protocols: `https` / `openvpn` / `ssh` / `shadowsocks`. <kbd>Alpine</kbd>
 
+
+## Usefull commands
+
+Docker layers number:
+
+```bash
+$> docker image inspect <image> -f '{{.RootFS.Layers}}' | wc -w
+3
+```
+
+
 -----
 
 ## License
