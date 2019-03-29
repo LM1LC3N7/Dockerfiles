@@ -32,7 +32,7 @@ $> docker image inspect <image> -f '{{.RootFS.Layers}}' | wc -w
 Image size:
 
 ```bash
-$ docker images <image>:<tag>
+$> docker images <image>:<tag>
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 <image>             <tag>               a12b345cd67e        3 days ago          16.2MB
 ```
