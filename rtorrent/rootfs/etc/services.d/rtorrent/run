@@ -1,5 +1,24 @@
 #!/usr/bin/with-contenv sh
 
+# Init
+echo "-----------------------------------------------"
+echo "   _             _  _                     _ "
+echo "  | |           (_)| |                   | |"
+echo "  | | _ __ ___   _ | |  ___   ___  _ __  | |_"
+echo "  | || '_ \ _ \ | || | / __| / _ \| '_ \ | __|"
+echo "  | || | | | | || || || (__ |  __/| | | || |_"
+echo "  |_||_| |_| |_||_||_| \___| \___||_| |_| \__|"
+echo ""
+echo "-----------------------------------------------"
+echo " Application : rtorrent"
+echo " Running user: rtorrent"
+echo " Base OS     : Alpine"
+echo "-----------------------------------------------"
+echo " rTorrent configuration"
+echo "   - Config file: ${RTORRENT_HOME}/rtorrent.rc"
+echo "   - Log file   : ${RTORRENT_HOME}/s6-start.log"
+echo "-----------------------------------------------"
+
 cd ${RTORRENT_HOME}
 
 echo "[*] Starting rtorrent"
