@@ -10,7 +10,7 @@ There is a web UI to control rTorrent, [jfurrow/flood](https://github.com/jfurro
 * **Base image:** Alpine linux
 * **`rtorrent` version:** Last version available on [edge testing alpine repository](http://dl-cdn.alpinelinux.org/alpine/edge/main)
 * **Multi-stage:** No
-* **Supervisor:** Yes, (`s6-overlay`)[https://github.com/just-containers/s6-overlay#goals]
+* **Supervisor:** Yes, [`s6-overlay`](https://github.com/just-containers/s6-overlay#goals)
 
 Command:
 
