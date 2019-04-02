@@ -8,9 +8,9 @@
 # ----- Building flood -----
 #
 
-FROM node:8.15.0 as flood-build
+FROM node:8.15.0 as build
 
-COPY assets//config.js /app/flood/config.js
+COPY assets/config.js /app/flood/config.js
 
 RUN echo \
  && echo "[*] Installing flood dependencies" \
@@ -44,8 +44,8 @@ FROM gcr.io/distroless/nodejs
 
 ENV HOME=/app/flood
 
-COPY --from=flood-build /app/flood /app/flood
-COPY --from=flood-build /usr/bin/curl /usr/bin/curl
+COPY --from=build /app/flood /app/flood
+COPY --from=build /usr/bin/curl /usr/bin/curl
 
 WORKDIR /app/flood
 
