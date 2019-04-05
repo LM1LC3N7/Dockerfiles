@@ -18,26 +18,5 @@ echo " netdata configuration"
 echo "   - Listen     : ${LISTEN_IP}:${LISTEN_PORT}"
 echo "-----------------------------------------------"
 
-
-
-# Applying perms
-echo && echo "[*] Applying permissions"
-#setcap SYS_PTRACE=+eip /opt/netdata/bin/srv/netdata
-# find /app \! -user netdata -exec chown netdata:netdata {} \;
-
-# Init config file
-echo && echo "[*] Initialisation"
-# touch /app/netdata.conf
-
-# Start SSLH with lower rights
 echo && echo "[*] Starting"
-# exec s6-setuidgid netdata \
-#    /app/netdata/bin/srv/netdata -D \
-#      -u netdata \
-#      -s /host \
-#      -i ${LISTEN_IP} \
-#      -p ${LISTEN_PORT} \
-#      -c /app/netdata.conf \
-#       $@
-
 exec /usr/sbin/netdata -D -c /etc/netdata/netdata.conf -u netdata -s /host -i ${LISTEN_IP} -p ${LISTEN_PORT}
