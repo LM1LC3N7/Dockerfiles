@@ -18,7 +18,6 @@ RUN echo \
             mono-vbnc \
             sqlite3 \
             unzip \
-            && \
  && echo \
  && echo "[*] Searching the last release version of duplicati from GitHub" \
  && VER=$(curl -s https://api.github.com/repos/duplicati/duplicati/releases | grep tag_name | head -n 1 | awk '{print $2}') \
