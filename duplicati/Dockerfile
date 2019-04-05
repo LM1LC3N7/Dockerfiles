@@ -15,6 +15,7 @@ RUN echo \
  && apt-get install -yq \
             bzip2 \
             curl \
+            wget \
             mediainfo \
             mono-devel \
             mono-vbnc \
