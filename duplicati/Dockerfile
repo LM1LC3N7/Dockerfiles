@@ -5,6 +5,8 @@ ENV S6_FIX_ATTRS_HIDDEN=1 \
    GID=991 \
    DEBIAN_FRONTEND=noninteractive
 
+SHELL ["/bin/bash", "-c"]
+
 RUN echo \
  && echo "[*] Updating OS" \
  && apt-get -yq update \
