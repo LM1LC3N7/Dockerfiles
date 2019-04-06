@@ -40,8 +40,8 @@ RUN echo \
  && cd /tmp && wget -q https://github.com/just-containers/s6-overlay/releases/download/${S6_VER}/s6-overlay-amd64.tar.gz \
  && echo \
  && echo "[*] Adding \"app\" user" \
- && addgroup --gid $GID app \
- && adduser --disabled-password --uid $UID --ingroup app --home=/config app \
+ && groupadd --gid $GID app \
+ && useradd -g app -u ${UID} -d /config app
  && chown -R app:app /config \
  && echo \
  && echo "[*] Cleaning" \
