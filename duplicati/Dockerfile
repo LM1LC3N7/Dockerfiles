@@ -41,7 +41,7 @@ RUN echo \
  && echo \
  && echo "[*] Adding \"app\" user" \
  && groupadd --gid $GID app \
- && useradd -g app -u ${UID} -d /config app
+ && useradd -g app -u ${UID} -d /config app \
  && chown -R app:app /config \
  && echo \
  && echo "[*] Cleaning" \
