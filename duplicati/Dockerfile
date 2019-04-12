@@ -31,9 +31,8 @@ RUN echo \
  && wget -q https://github.com/duplicati/duplicati/releases/download/${VER}/duplicati-${VER_ZIP}.zip \
  && echo \
  && echo "[*] Installing Duplicati" \
- && unzip -qq /tmp/duplicati-${VER_ZIP}.zip -d /duplicati
-
-RUN  echo \
+ && unzip -qq /tmp/duplicati-${VER_ZIP}.zip -d /duplicati \
+ && echo \
  && echo "[*] Searching the last release version of s6-overlay from GitHub" \
  && S6_VER=$(curl --silent "https://api.github.com/repos/just-containers/s6-overlay/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') \
  && echo \

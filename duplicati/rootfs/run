@@ -21,9 +21,21 @@ echo "-----------------------------------------------"
 echo "[*] Applying permissions to /config"
 chown -R app:app /config
 
+echo "[*] Applying permissions to /restore"
+chown -R app:1111 /restore
+
+# Seems this folder is used as tmp
+echo "[*] Applying permissions to /root/.config"
+mkdir /root/.config
+chown -R app:app /root/.config
+
+echo "[*] Applying permissions to /backups"
+groupadd --gid 1111 duplicati-backup
+chgrp -R duplicati-backup /backups
+
 echo "[*] Starting Duplicati"
 cd /duplicati
-exec s6-setuidgid app \
+exec s6-setuidgid 991:1111 \
   mono Duplicati.Server.exe \
   --webservice-interface=any \
   --server-datafolder=/config \
