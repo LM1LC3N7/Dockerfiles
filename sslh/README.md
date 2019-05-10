@@ -7,7 +7,7 @@ Applicative protocol multiplexer ([sslh](https://github.com/yrutschle/sslh)) use
 * **Base image:** Alpine linux
 * **`sslh` version:** Last version available on [edge testing alpine repository](http://dl-3.alpinelinux.org/alpine/edge/testing)
 * **Multi-stage:** No
-* **Supervisor:** Yes, (`s6-overlay`)[https://github.com/just-containers/s6-overlay#goals]
+* **Supervisor:** Yes, [`s6-overlay`](https://github.com/just-containers/s6-overlay#goal)
 
 Command:
 
