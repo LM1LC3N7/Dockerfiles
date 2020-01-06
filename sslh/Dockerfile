@@ -1,4 +1,4 @@
-FROM alpine:3.9
+FROM alpine:latest
 
 ENV LISTEN_IP=0.0.0.0 \
     LISTEN_PORT=443 \
@@ -49,3 +49,4 @@ LABEL description="SSLH in last version based on alpine" \
       maintainer="Louis MILCENT <louis@lmilcent.com>"
 
 ENTRYPOINT ["/init"]
+

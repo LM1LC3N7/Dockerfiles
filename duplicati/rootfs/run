@@ -24,16 +24,14 @@ chown -R app:app /config
 echo "[*] Applying permissions to /restore"
 chown -R app:1111 /restore
 
-# Seems this folder is used as tmp
-echo "[*] Applying permissions to /root/.config"
-mkdir /root/.config
-chown -R app:app /root/.config
-
+# duplicati-backups really exist on the docker host
+# This allow the container to read some files and folders
 echo "[*] Applying permissions to /backups"
 groupadd --gid 1111 duplicati-backup
 chgrp -R duplicati-backup /backups
 
 echo "[*] Starting Duplicati"
+# UID 991 = app
 cd /duplicati
 exec s6-setuidgid 991:1111 \
   mono Duplicati.Server.exe \

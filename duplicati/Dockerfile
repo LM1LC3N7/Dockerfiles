@@ -1,4 +1,4 @@
-FROM mono:5-slim
+FROM debian:9-slim
 
 ENV S6_FIX_ATTRS_HIDDEN=1 \
    UID=991 \
@@ -16,11 +16,18 @@ RUN echo \
             bzip2 \
             curl \
             wget \
-            mediainfo \
-            mono-devel \
-            mono-vbnc \
+            #mediainfo \
+            #mono-devel \
+            #mono-vbnc \
             sqlite3 \
             unzip \
+            apt-transport-https dirmngr gnupg ca-certificates \
+ && echo \
+ && echo "[*] Installation last version of mono from official website" \
+ && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF \
+ && echo "deb https://download.mono-project.com/repo/debian stable-stretch main" | tee /etc/apt/sources.list.d/mono-official-stable.list \
+ && apt update \
+ && apt install mono-xsp4 -y \
  && echo \
  && echo "[*] Searching the last release version of duplicati from GitHub" \
  && VER=$(curl -s https://api.github.com/repos/duplicati/duplicati/releases | grep tag_name | head -n 1 | awk '{print $2}') \
