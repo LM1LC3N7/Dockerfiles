@@ -9,7 +9,7 @@ const CONFIG = {
   secret: process.env.FLOOD_SECRET || 'wbeasTfINGYANDrExtrIm',
   ssl: process.env.FLOOD_ENABLE_SSL === 'true' || process.env.FLOOD_ENABLE_SSL === true,
   scgi: {
-    host: '127.0.0.1',
+    host: 'rtorrent',
     port: 5000,
     socket: false
   }

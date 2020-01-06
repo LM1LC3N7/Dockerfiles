@@ -1,4 +1,4 @@
-FROM debian:9-slim
+FROM debian:9-slim as build
 
 ENV S6_FIX_ATTRS_HIDDEN=1 \
    UID=991 \
@@ -27,7 +27,7 @@ RUN echo \
  && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF \
  && echo "deb https://download.mono-project.com/repo/debian stable-stretch main" | tee /etc/apt/sources.list.d/mono-official-stable.list \
  && apt update \
- && apt install mono-xsp4 -y \
+ && apt install mono-devel -y \
  && echo \
  && echo "[*] Searching the last release version of duplicati from GitHub" \
  && VER=$(curl -s https://api.github.com/repos/duplicati/duplicati/releases | grep tag_name | head -n 1 | awk '{print $2}') \
@@ -58,7 +58,20 @@ RUN echo \
  && echo "[*] Cleaning" \
  && apt-get clean && rm -fr /var/lib/apt/list/* /tmp/*
 
-COPY rootfs/run /etc/services.d/duplicati/run
+RUN mkdir /backups /restore
+
+
+FROM gcr.io/distroless/base:debug
+
+COPY --from=build /usr/bin/mono-sgen /usr/bin/mono-sgen
+COPY --from=build /usr/bin/mono /usr/bin/mono
+COPY --from=build /bin/sh /bin/sh
+COPY --from=build /duplicati /duplicati
+COPY --from=build /config /config
+COPY --from=build /backups /backups
+COPY --from=build /restore /restore
+
+#COPY rootfs/run /etc/services.d/duplicati/run
 
 VOLUME /backups /restore /config
 
@@ -67,4 +80,6 @@ EXPOSE 8200
 LABEL description="Duplicati in last version based on mono:5-slim (debian)" \
       maintainer="Louis MILCENT <louis@lmilcent.com>"
 
-ENTRYPOINT ["/init"]
+#ENTRYPOINT ["/init"]
+#ENTRYPOINT["/busybox/sh" "-c" "ls" "/usr/bin"]
+ENTRYPOINT ["/usr/bin/mono" "/duplicati/Duplicati.Server.exe" "--webservice-interface=any" "--server-datafolder=/config" "--webservice-allowed-hostnames=*"]

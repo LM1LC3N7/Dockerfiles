@@ -1,4 +1,4 @@
-FROM alpine:3.9
+FROM alpine:latest
 
 ENV S6_FIX_ATTRS_HIDDEN=1 \
    RTORRENT_HOME=/app/rtorrent \
@@ -46,7 +46,8 @@ RUN echo \
 
 VOLUME /app/rtorrent/download /app/rtorrent/config /app/rtorrent/log /app/rtorrent/watch
 
-EXPOSE 3000 49184 49184/udp
+#EXPOSE 3000 49184 49184/udp
+EXPOSE 5000
 
 LABEL description="rTorrent in last version based on alpine" \
       maintainer="Louis MILCENT <louis@lmilcent.com>"

@@ -31,6 +31,27 @@ docker build -t lmilcent/flood:distroless .
 
 This image is using the `proxy` network in order to contact the `traefik` container (a proxy service) and is also connected to `rtorrent-backend` to contact rTorrent service.
 
+
+
+## Start
+
+### 1. Import Secrets
+Import all secrets stored as system variables into `SECRET.env` before starting the container.
+
+`SECRET.env` example:
+
+```bash
+declare -x FLOOD_SECRET="long-random-password"
+```
+
+To import all secrets on the current bash:
+
+```bash
+. SECRET.env
+```
+
+
+### 2. Start the container
 Startup command, using the `appDeploy/startContainer` script:
 
 ```bash
