@@ -1,5 +1,8 @@
 #/bin/bash
 
+# /!\ This script will ONLY import secret to env variables
+#     at the script level, not in the user bash session
+
 # `SECRET.env` example:
 # declare -x FLOOD_SECRET="long-random-password"
 
