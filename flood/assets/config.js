@@ -1,3 +1,5 @@
+// Default configuration, with passwords from env variables
+// but a default (randomly generated) password is used in backup
 const CONFIG = {
   baseURI: process.env.WEBROOT || '/',
   floodServerHost: '0.0.0.0',
