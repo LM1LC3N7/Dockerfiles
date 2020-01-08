@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv sh
+
+# Remove rtorrent.lock
+rm -f ${RTORRENT_HOME}/session/rtorrent.lock

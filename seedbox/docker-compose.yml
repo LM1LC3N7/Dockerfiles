@@ -20,7 +20,7 @@ services:
     # COMPILATION
     # -----------
     build:
-        context: .
+        context: ./flood/
         dockerfile: Dockerfile
 
 
@@ -61,11 +61,13 @@ services:
     #environment: 
     #  TEST_ENV_SECRET: ${ENV_SECRET}
     # Public variables
-    env_file: default.env
+    env_file: ./flood/default.env
       
     # Volumes
     volumes:
       - rtorrent-flood-db:/app/flood/flood-db:rw
+    volumes_from:
+      - rtorrent
 
 
     # ---------
@@ -116,16 +118,119 @@ services:
       - DAC_OVERRIDE
 
 
+
+
+  # Service name
+  rtorrent:
+
+    # Build with github clone
+    image: lmilcent/rtorrent:alpine
+
+    # Container name
+    container_name: rtorrent
+
+
+    # -----------
+    # COMPILATION
+    # -----------
+    build:
+        context: ./rtorrent/
+        dockerfile: Dockerfile
+
+
+    # -------
+    # STARTUP
+    # -------
+
+    # Mode interactive
+    stdin_open: false
+
+    # Add a tty
+    tty: true
+
+    # no / always / on-failure / unless-stopped
+    restart: unless-stopped
+
+    # Stop delay (1s, 1m30s, etc.) and signal (SIGTERM is default)
+    stop_grace_period: 10s
+    stop_signal: SIGTERM
+
+
+    # ---------------------
+    # LABELS, ENV & VOLUMES
+    # ---------------------
+
+    #labels:
+
+    # Environment variables
+    env_file: ./rtorrent/default.env
+      
+    # Volumes
+    volumes:
+      - /data/medias/downloaded:/app/rtorrent/download:rw
+      - rtorrent-config:/app/rtorrent/config:rw
+
+
+    # ---------
+    # RESOURCES
+    # ---------
+
+    # Limit resources
+    cpus: 2
+    mem_limit: 1024m
+    memswap_limit: 1024m
+
+
+    # -------
+    # NETWORK
+    # -------
+    
+    # Expose port to linked services (internal only)
+    #expose:
+    
+    # Expose port to ALL
+    #ports:
+
+    # Network
+    networks:
+      - proxy
+      - rtorrent-backend
+
+
+    # -----
+    # OTHER
+    # -----
+    
+    # Override entrypoints and command
+    #entrypoint: /bin/bash
+    #command: "printenv | grep TEST"
+
+
+    # --------
+    # SECURITY
+    # --------
+    
+    # Drop capabilities (man 7 capabilities for list)
+    # Should drop ALL by default
+    cap_drop:
+      - ALL
+
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+
+
 # ----------------------------
 # CREATION: NETWORKS & VOLUMES
 # ----------------------------
 volumes:
-  # Join an existing volume
   rtorrent-flood-db:
     name: rtorrent-flood-db
-
-  # Create a new volume
-  #rtorrent-flood-db:
+  rtorrent-config:
+    name: rtorrent-config
 
 networks:
   # Join an existing network
@@ -134,6 +239,3 @@ networks:
 
   rtorrent-backend:
     name: rtorrent-backend
-
-# To create a network
-#  proxy:
