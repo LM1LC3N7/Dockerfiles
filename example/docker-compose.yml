@@ -1,0 +1,127 @@
+# Version 2.0 mandatory for CPU limiting
+# See: https://github.com/docker/compose/issues/4513
+
+version: '2.4'
+
+
+services:
+
+  # Service name
+  test:
+
+    # Download the image or build it
+    image: debian:latest
+
+    # Container name
+    container_name: test
+
+
+    # -----------
+    # COMPILATION
+    # -----------
+    #build:
+        # Path of build file and name
+    #    context: ./build
+    #    dockerfile: Dockerfile
+        
+        #args:
+        #  version: 1.0.0
+
+    #    labels:
+    #      author: "Louis MILCENT"
+
+        #network: bridge
+
+
+    # -------
+    # STARTUP
+    # -------
+
+    # Links others running containers
+    #links:
+    #  - "container1"
+
+    # Mode interactive
+    stdin_open: true
+
+    # Add a tty
+    tty: true
+
+    # no / always / on-failure / unless-stopped
+    restart: unless-stopped
+
+    # Stop delay (1s, 1m30s, etc.) and signal (SIGTERM is default)
+    stop_grace_period: 10s
+    stop_signal: SIGTERM
+
+
+    # ------------
+    # VOLUME & ENV
+    # ------------
+
+    # Environment variables
+    environment: 
+      TEST_ENV_SECRET: ${ENV_SECRET}
+    env_file: default.env
+      
+    # Volumes
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    #  - datavolume:/data:rw
+
+
+    # ---------
+    # RESOURCES
+    # ---------
+
+    # Limit resources
+    cpus: 0.5
+    mem_limit: 150m
+    memswap_limit: 150m
+
+
+    # -------
+    # NETWORK
+    # -------
+    
+    # Expose port to linked services (internal only)
+    #expose:
+    #  - "3000"
+    
+    # Expose port to ALL
+    #ports:
+    #  - "3333:3333/udp"
+
+    # Network
+    networks:
+      - internal
+
+
+    # -----
+    # OTHER
+    # -----
+    
+    # Override entrypoints and command
+    entrypoint: /bin/bash
+    #command: "printenv | grep TEST"
+
+
+    # --------
+    # SECURITY
+    # --------
+    
+    # Drop capabilities (man 7 capabilities for list)
+    cap_drop:
+      - ALL
+    #cap_add:
+    #  - CAP_CHOWN
+    #  - CAP_FOWNER
+
+
+# --------
+# NETWORKS
+# --------
+networks:
+  internal:
+    internal: true
+    #driver: bridge
