@@ -18,7 +18,8 @@ echo " Duplicati configuration"
 echo "   - Config folder : /config"
 echo "-----------------------------------------------"
 
-chmod +x /apply-backup-group.sh
+chmod +rx /apply-backup-group.sh
+chown -R root:app /apply-backup-group.sh
 
 echo "[*] Applying permissions to /config"
 chown -R app:app /config
