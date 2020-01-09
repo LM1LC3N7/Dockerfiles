@@ -16,8 +16,8 @@ Some resources:
 * [`appDeploy`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/appDeploy) : A bash script, kind of `docker-compose` without the stack part to start container with secure parameters. It start a container and create all resources (volumes and networks) based on a simple config file.
 * [`ghost`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/ghost) : Simple blog CMS ([Ghost](https://ghost.org/fr/)). <kbd>Distroless</kbd>
 * [`netdata`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/netdata) : [Netdata](https://github.com/firehol/netdata) is a real-time, performance and health monitoring for systems and applications. <kbd>Alpine</kbd>
-* [`rtorrent`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/rtorrent) : A torrent download tool ([rtorrent](https://github.com/rakshasa/rtorrent)). <kbd>Alpine</kbd>
-* [`flood`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/flood) : A clean web interface for `rtorrent` ([flood](https://github.com/jfurrow/flood)). <kbd>Distroless</kbd>
+* [`rtorrent`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/seedbox/rtorrent) : A torrent download tool ([rtorrent](https://github.com/rakshasa/rtorrent)). <kbd>Alpine</kbd>
+* [`flood`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/seedbox/flood) : A clean web interface for `rtorrent` ([flood](https://github.com/jfurrow/flood)). <kbd>Distroless</kbd>
 * [`sslh`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/sslh) : Applicative protocol multiplexer ([sslh](https://github.com/yrutschle/sslh)) usefull to use the 443 port with multiple protocols: `https` / `openvpn` / `ssh` / `shadowsocks`. <kbd>Alpine</kbd>
 
 
