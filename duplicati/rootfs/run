@@ -23,6 +23,9 @@ chmod +rx /apply-backup-group.sh
 chown -R root:app /apply-backup-group.sh
 # Allow user "app" to run the script as root
 echo "app     ALL=(ALL) NOPASSWD: /apply-backup-group.sh" >> /etc/sudoers
+# Remove first sudo warning
+echo "Defaults        lecture = never" >> /etc/sudoers
+#touch /home/app/.sudo_as_admin_successful
 
 echo "[*] Applying permissions to /config"
 chown -R app:app /config
