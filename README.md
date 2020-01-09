@@ -16,6 +16,7 @@ Some resources:
 My commandments are:
 * Limit container resources (avoid that one container use all resources)
 * Limit container rights by dropping linux capabilities by default
+* Only run processes with simple user rights
 * Create my own image based on distroless or alpine to limit the surface attack
 
 I use docker-compose [v2.4](https://docs.docker.com/compose/compose-file/compose-file-v2/) because the [v3 does not allow resource limiting on a docker host non-swarm](https://github.com/docker/compose/issues/4513).
