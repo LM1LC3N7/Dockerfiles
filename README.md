@@ -11,9 +11,18 @@ Some resources:
 * [Distroless is for Security if not for size](https://medium.com/@dwdraju/distroless-is-for-security-if-not-for-size-6eac789f695f)
 
 
+## Securely deploy containers
+
+My commandments are:
+* Limit container resources (avoid that one container use all resources)
+* Limit container rights by dropping linux capabilities by default
+* Create my own image based on distroless or alpine to limit the surface attack
+
+I use docker-compose [v2.4](https://docs.docker.com/compose/compose-file/compose-file-v2/) because the [v3 does not allow resource limiting on a docker host non-swarm](https://github.com/docker/compose/issues/4513).
+
+
 ## My docker containers
 
-* [`appDeploy`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/appDeploy) : A bash script, kind of `docker-compose` without the stack part to start container with secure parameters. It start a container and create all resources (volumes and networks) based on a simple config file.
 * [`ghost`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/ghost) : Simple blog CMS ([Ghost](https://ghost.org/fr/)). <kbd>Distroless</kbd>
 * [`netdata`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/netdata) : [Netdata](https://github.com/firehol/netdata) is a real-time, performance and health monitoring for systems and applications. <kbd>Alpine</kbd>
 * [`rtorrent`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/seedbox/rtorrent) : A torrent download tool ([rtorrent](https://github.com/rakshasa/rtorrent)). <kbd>Alpine</kbd>
