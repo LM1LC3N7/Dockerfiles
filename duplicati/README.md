@@ -9,7 +9,7 @@ It is available on [GitHub](https://github.com/duplicati/duplicati/) and it work
 ## Build
 
 * **Base image:** Debian (`mono:5-slim`)
-* **`Duplicati` version:** Last version available on [GitHub releases](https://github.com/duplicati/duplicati/releases)
+* **Duplicati version:** Last version available on [GitHub releases](https://github.com/duplicati/duplicati/releases)
 * **Multi-stage:** No
 * **Supervisor:** Yes, [`s6-overlay`](https://github.com/just-containers/s6-overlay#goals)
 
