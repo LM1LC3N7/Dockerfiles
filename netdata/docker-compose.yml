@@ -1,0 +1,122 @@
+# Version 2.0 mandatory for CPU limiting
+# See: https://github.com/docker/compose/issues/4513
+
+version: '2.4'
+
+
+services:
+
+  # Service name
+  netdata:
+
+    # Download the image or build it
+    image: lmilcent/netdata:1.19.0
+
+    # Container name
+    container_name: netdata
+
+
+    # -----------
+    # COMPILATION
+    # -----------
+    build:
+       # Path of build file and name
+       context: .
+       dockerfile: Dockerfile
+        
+
+    # -------
+    # STARTUP
+    # -------
+
+    # Mode interactive
+    stdin_open: false
+    tty: false
+
+    # no / always / on-failure / unless-stopped
+    restart: unless-stopped
+
+    # Stop delay (1s, 1m30s, etc.) and signal (SIGTERM is default)
+    stop_grace_period: 5s
+    stop_signal: SIGTERM
+
+
+    # --------------------
+    # VOLUME & ENV & LABEL
+    # --------------------
+
+    # Environment variables
+    #environment: 
+    #env_file: default.env
+
+    # Labels
+    labels:
+      traefik.enable: true
+      traefik.frontend.rule: "Host:monitoring.lmilcent.com"
+      traefik.port: "19999"
+      traefik.backend: "netdata"
+      traefik.docker.network: "proxy"
+      traefik.frontend.entryPoints: "http,https"
+      traefik.frontend.redirect.entryPoint: "https"
+      traefik.protocol: "http"
+      traefik.frontend.auth.basic.users: "monitoring:${NETDATA_BASIC_AUTH}"
+
+    # Volumes
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+
+    # ---------
+    # RESOURCES
+    # ---------
+
+    # Limit resources
+    cpus: 0.5
+    mem_limit: 250m
+    memswap_limit: 250m
+
+
+    # -------
+    # NETWORK
+    # -------
+    
+    # Network
+    networks:
+      - proxy
+
+
+    # -----
+    # OTHER
+    # -----
+    
+    # Override entrypoints and command
+    #entrypoint: /bin/bash
+    #command: "printenv | grep TEST"
+
+
+    # --------
+    # SECURITY
+    # --------
+    
+    # Drop capabilities (man 7 capabilities for list)
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - FSETID
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - SYS_PTRACE
+
+
+# --------
+# NETWORKS
+# --------
+networks:
+  # Connect to existing network
+  proxy:
+    name: proxy
