@@ -59,6 +59,7 @@ RUN echo \
  && apt-get clean && rm -fr /var/lib/apt/list/* /tmp/*
 
 COPY rootfs/run /etc/services.d/duplicati/run
+COPY rootfs/apply-backup-group.sh /apply-backup-group.sh
 
 VOLUME /backups /restore /config
 
