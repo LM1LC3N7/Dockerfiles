@@ -18,8 +18,11 @@ echo " Duplicati configuration"
 echo "   - Config folder : /config"
 echo "-----------------------------------------------"
 
+echo "[*] Applying permissions to /apply-backup-group.sh"
 chmod +rx /apply-backup-group.sh
 chown -R root:app /apply-backup-group.sh
+# Allow user "app" to run the script as root
+echo "app     ALL=(ALL) NOPASSWD: /apply-backup-group.sh" >> /etc/sudoers
 
 echo "[*] Applying permissions to /config"
 chown -R app:app /config
