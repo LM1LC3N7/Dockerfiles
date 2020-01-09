@@ -10,6 +10,9 @@
 
 FROM node:8-stretch as build
 
+# https://github.com/TryGhost/Ghost/releases
+ENV GHOST_VER=3.2.0
+
 RUN echo \
  && echo "[*] Installing ghost dependencies" \
  && apt-get update && apt-get install -y \
@@ -19,7 +22,7 @@ SHELL ["/bin/bash", "-c"]
 
 RUN echo \
  && echo "[*] Searching the last release version of ghost from GitHub" \
- && GHOST_VER=$(curl --silent "https://api.github.com/repos/TryGhost/Ghost/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') \
+ && GHOST_VER_OLD=$(curl --silent "https://api.github.com/repos/TryGhost/Ghost/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') \
  && echo \
  && echo "[*] Downloading Ghost version ${GHOST_VER} from github" \
  && cd /tmp && wget -q https://github.com/TryGhost/Ghost/releases/download/${GHOST_VER}/Ghost-${GHOST_VER}.zip \
@@ -63,15 +66,13 @@ RUN echo \
 # Stage 2:
 # ----- Creating final image -----
 #
-FROM gcr.io/distroless/nodejs
+FROM gcr.io/distroless/nodejs:debug
 
 ENV HOME=/ghost \
     NODE_ENV=production
 
 COPY --from=build /ghost /ghost
 COPY --from=build /tmp /tmp
-COPY rootfs/ghost/ghost-distroless.conf /ghost/config.production.json
-COPY rootfs/ghost/ghost-distroless.conf /ghost/config.development.json
 
 WORKDIR /ghost
 

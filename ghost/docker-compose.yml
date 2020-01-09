@@ -1,0 +1,233 @@
+# Version 2.0 mandatory for CPU limiting
+# See: https://github.com/docker/compose/issues/4513
+
+version: '2.4'
+
+
+services:
+
+  # Service name
+  ghost:
+
+    # Build Ghost from GitHub, check manually the last version
+    # https://github.com/TryGhost/Ghost/releases
+    image: lmilcent/ghost:3.0.0-distroless
+
+    # Container name
+    container_name: ghost
+
+
+    # -----------
+    # COMPILATION
+    # -----------
+    build:
+        context: .
+        dockerfile: Dockerfile
+
+
+    # -------
+    # STARTUP
+    # -------
+
+    # Mode interactive
+    stdin_open: true
+
+    # Add a tty
+    tty: true
+
+    # no / always / on-failure / unless-stopped
+    restart: unless-stopped
+
+    # Stop delay (1s, 1m30s, etc.) and signal (SIGTERM is default)
+    stop_grace_period: 15s
+    stop_signal: SIGTERM
+
+
+    # ---------------------
+    # LABELS, ENV & VOLUMES
+    # ---------------------
+
+    labels:
+      traefik.enable: true
+      traefik.frontend.rule: "Host:blog.lmilcent.com"
+      traefik.port: "2368"
+      traefik.backend: "Ghost"
+      traefik.docker.network: "proxy"
+      traefik.frontend.entryPoints: "http,https"
+      traefik.frontend.redirect.entryPoint: "https"
+      traefik.protocol: "http"
+
+    # Environment variables
+    # For secrets with host environment variables
+    environment: 
+      database__connection__password: ${GHOST_DB_SECRET}
+      mail__options__host: ${GHOST_SMTP_HOST}
+      mail__options__auth__user: ${GHOST_SMTP_USER}
+      mail__options__auth__pass: ${GHOST_SMTP_SECRET}
+    # Public variables
+    env_file: ghost.env
+      
+    # Volumes
+    volumes:
+      - ghost-content:/ghost/content:rw
+
+
+    # ---------
+    # RESOURCES
+    # ---------
+
+    # Limit resources
+    cpus: 1
+    mem_limit: 256m
+    memswap_limit: 256m
+
+
+    # -------
+    # NETWORK
+    # -------
+    
+    # Network
+    networks:
+      - proxy
+      - ghost-backend
+
+
+    # -----
+    # OTHER
+    # -----
+    
+    # Override entrypoints and command
+    #entrypoint: /busybox/sh 
+    #command: "/busybox/cat /ghost/config.production.json"
+
+
+    # --------
+    # SECURITY
+    # --------
+    
+    # Drop capabilities (man 7 capabilities for list)
+    # Should drop ALL by default
+    #cap_drop:
+
+    #cap_add:
+    #  - CAP_CHOWN
+    #  - CAP_FOWNER
+
+
+
+
+
+
+  # Service name
+  mysql:
+
+    # Pull from GitHub
+    image: mariadb:5.5
+
+    # Container name
+    container_name: ghost-db
+
+
+    # -------
+    # STARTUP
+    # -------
+
+    # Mode interactive
+    stdin_open: false
+    tty: false
+
+    # no / always / on-failure / unless-stopped
+    restart: unless-stopped
+
+    # Stop delay (1s, 1m30s, etc.) and signal (SIGTERM is default)
+    stop_grace_period: 15s
+    stop_signal: SIGTERM
+
+
+    # ---------------------
+    # LABELS, ENV & VOLUMES
+    # ---------------------
+
+    #labels:
+
+    # Environment variables
+    # For secrets with host environment variables
+    environment: 
+      MYSQL_ROOT_PASSWORD: ${GHOST_MYSQL_ROOT_SECRET}
+      MYSQL_PASSWORD: ${GHOST_MYSQL_SECRET}
+
+    # Public variables
+    env_file: mysql.env
+      
+    # Volumes
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ghost-db-data:/var/lib/mysql:rw
+ 
+
+    # ---------
+    # RESOURCES
+    # ---------
+
+    # Limit resources
+    cpus: 1
+    mem_limit: 256m
+    memswap_limit: 256m
+
+
+    # -------
+    # NETWORK
+    # -------
+    
+    # Network
+    networks:
+      - ghost-backend
+
+
+    # -----
+    # OTHER
+    # -----
+    
+    # Override entrypoints and command
+    #entrypoint: /bin/bash
+    #command: "printenv | grep TEST"
+
+
+    # --------
+    # SECURITY
+    # --------
+    
+    # Drop capabilities (man 7 capabilities for list)
+    # Should drop ALL by default
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - SETGID 
+      - SETUID
+      - DAC_OVERRIDE
+
+
+
+
+# ----------------------------
+# CREATION: NETWORKS & VOLUMES
+# ----------------------------
+volumes:
+  # Join an existing volume
+  ghost-content:
+    name: ghost-content
+
+  ghost-db-data:
+
+#  ghost-db:
+#    name: ghost-db
+
+networks:
+  # Join an existing network
+  proxy:
+    name: proxy
+
+  ghost-backend:
+    name: ghost-backend
