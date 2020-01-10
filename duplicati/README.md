@@ -91,7 +91,7 @@ $ docker logs -f duplicati
 
 
 ## Duplicati Options
-On the main page, click on "Settings" and then paste the following into "Default options" input:
+On the main page, click on "Settings" and then paste the following into "Default options" input ([see official example](https://github.com/duplicati/duplicati/blob/master/Duplicati/Library/Modules/Builtin/run-script-example.sh)):
 
 ```
 --aes-set-threadlevel=4
@@ -106,6 +106,7 @@ On the main page, click on "Settings" and then paste the following into "Default
 --restore-path=/restore
 --retry-delay=10s
 --run-script-before=/apply-backup-group.sh
+--run-script-timeout=5m
 --send-mail-any-operation=true
 --send-mail-from=no-reply@your.domain.tld
 --send-mail-level=Warning,Error
