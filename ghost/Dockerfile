@@ -66,7 +66,7 @@ RUN echo \
 # Stage 2:
 # ----- Creating final image -----
 #
-FROM gcr.io/distroless/nodejs:debug
+FROM gcr.io/distroless/nodejs
 
 ENV HOME=/ghost \
     NODE_ENV=production
