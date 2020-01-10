@@ -47,6 +47,12 @@ declare -x GHOST_SMTP_USER="user"
 declare -x GHOST_SMTP_SECRET="pass"
 ```
 
+Then import secrets to the local bash:
+
+```bash
+. SECRET.env
+```
+
 **ghost.env**
 
 ```bash
@@ -69,9 +75,11 @@ imageOptimization__resize=true
 
 ## Start
 
-Startup command, using `docker-compose up -d`:
+Using `docker-compose up -d`:
 
 ```bash
+$ . SECRET.env
+$ docker-compose up -d 
 $ docker logs -f ghost
 [2020-01-09 17:33:30] WARN Theme's file locales/fr.json not found.
 [2020-01-09 17:33:30] WARN Falling back to locales/en.json.
