@@ -21,7 +21,7 @@ echo "-----------------------------------------------"
 echo "[*] Applying permissions to /apply-backup-group.sh"
 chmod +rx /apply-backup-group.sh
 # Allow user "app" to run the script as root
-echo "app     ALL=(ALL) NOPASSWD: /bin/chgrp" >> /etc/sudoers
+echo "app     ALL=(ALL) NOPASSWD: /bin/chgrp, /usr/bin/find, /bin/chmod" >> /etc/sudoers
 # Remove first sudo warning
 echo "Defaults        lecture = never" >> /etc/sudoers
 
