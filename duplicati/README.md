@@ -21,14 +21,14 @@ docker-compose build duplicati
 
 ## Image details
 
-* **Based on:** Debian
-* **Layers:** 4
-* **Size:** 718 Mio
-* **Startup time:** 10 seconds
-* **Auto-restart:** yes
-* **Time Synchronization** yes, with host
-* **Hardware limitations:** 2 CPU, 1024 Mio RAM, no SWAP
-* **Low privileges** yes, running using `app` user
+* **Based on:**                 Debian
+* **Layers:**                   4
+* **Size:**                     718 Mio
+* **Startup time:**             10 seconds
+* **Auto-restart:**             yes
+* **Time Synchronization**      yes, with host
+* **Hardware limitations:**     2 CPU, 1024 Mio RAM, no SWAP
+* **Low privileges:**           yes, running using `app` user
 * **Capabilities limitations:** No, for now :-(
 
 This image is using the `proxy` network in order to contact the `traefik` container (a proxy service).
@@ -91,7 +91,7 @@ $ docker logs -f duplicati
 
 
 ## Duplicati Options
-On the main page, click on "Settings" and then paste the following into "Default options" input:
+On the main page, click on "Settings" and then paste the following into "Default options" input ([see official example](https://github.com/duplicati/duplicati/blob/master/Duplicati/Library/Modules/Builtin/run-script-example.sh)):
 
 ```
 --aes-set-threadlevel=4
@@ -106,6 +106,7 @@ On the main page, click on "Settings" and then paste the following into "Default
 --restore-path=/restore
 --retry-delay=10s
 --run-script-before=/apply-backup-group.sh
+--run-script-timeout=5m
 --send-mail-any-operation=true
 --send-mail-from=no-reply@your.domain.tld
 --send-mail-level=Warning,Error
