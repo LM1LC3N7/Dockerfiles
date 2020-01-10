@@ -71,7 +71,7 @@ services:
       - /home/lmilcent:/backups/lmilcent:rw
       - /home/adeloris:/backups/adeloris:rw
       - /data/duplicati:/restore:rw
-      - /docker/volumes:/backups/docker-volumes:rw
+      - /docker/volumes:/backups/docker/volumes:rw
 
 
     # ---------

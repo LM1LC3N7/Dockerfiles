@@ -58,11 +58,14 @@ RUN echo \
 COPY rootfs/run /etc/services.d/duplicati/run
 COPY rootfs/apply-backup-group.sh /apply-backup-group.sh
 
-VOLUME /backups /restore /config
+# Volume to use
+# Do not uncomment this line if you add <docker install path>/volumes to /backups
+# It will work but generate an error "filesystem loop" when applying rights
+#VOLUME /backups /restore /config
 
 EXPOSE 8200
 
-LABEL description="Duplicati in last version based on mono:5-slim (debian)" \
+LABEL description="Duplicati in last version based on debian:9-slim" \
       maintainer="Louis MILCENT <louis@lmilcent.com>"
 
 ENTRYPOINT ["/init"]
