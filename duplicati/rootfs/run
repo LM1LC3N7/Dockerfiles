@@ -21,7 +21,7 @@ echo "-----------------------------------------------"
 echo "[*] Applying permissions to /apply-backup-group.sh"
 chmod +rx /apply-backup-group.sh
 # Allow user "app" to run the script as root
-echo "app     ALL=(ALL) NOPASSWD: /bin/chgrp, /usr/bin/find, /bin/chmod" >> /etc/sudoers
+echo "app     ALL= NOPASSWD: /bin/chgrp, /usr/bin/find, /bin/chmod" >> /etc/sudoers
 # Remove first sudo warning
 echo "Defaults        lecture = never" >> /etc/sudoers
 
@@ -36,6 +36,7 @@ chown -R app:1111 /restore
 echo "[*] Applying permissions to /backups"
 groupadd --gid 1111 duplicati-backup
 chgrp -R duplicati-backup /backups
+usermod -G 1111 app
 
 echo "[*] Starting Duplicati"
 # UID 991 = app

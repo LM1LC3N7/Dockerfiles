@@ -5,10 +5,10 @@
 # run-script-before
 sudo -n chgrp -R duplicati-backup /backups
 
-# Apply rights to duplicati-backup group
-
-find /backups -type f -exec chmod g+r {} \;
-find /backups -type d -exec chmod g+rx {} \;
+# Search files and directories without the correct group rights
+# and apply rights
+sudo find /backups -type f \! -perm /g+r -exec chmod g+r {} \;
+sudo find /backups -type d \! -perm /g+rx -exec chmod g+rx {} \;
 
 if [ $? -ne 0 ] ; then
   exit $?
