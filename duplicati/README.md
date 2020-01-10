@@ -46,9 +46,8 @@ All files and folders added to duplicati container (into `/backups/`) will be ad
 Also, they should be at least readable for the group. For example:
 
 ```bash
-find /backups -type f -exec chmod 00660 {} \;
-find /backups -type d -exec chmod 00770 {} \;
-find /backups -type f -iname "*.sh" -exec chmod 00770 {} \;
+sudo find /backups -type f -not -regex ".*/.ssh/id_rsa" \! -perm /g+r -exec chmod g+r {} \;
+sudo find /backups -type d -not -regex ".*/.ssh" \! -perm /g+rx -exec chmod g+rx {} \;
 ```
 
 ## Start
