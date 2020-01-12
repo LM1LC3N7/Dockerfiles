@@ -4,12 +4,16 @@ A seedbox service allow to download torrent files on the server, and then downlo
 This service is composed in two part, one is the downloader application (rTorrent) and is other one is the web interface (flood).
 
 
-## rTorrent
+### rTorrent
 
 rTorrent is an open-source BitTorrent client available on [GitHub](https://github.com/rakshasa/rtorrent/).
 Starting from version 0.9.7, `rtorrent` can be launch as a daemon, no more `screen` or `tmux`.
 
 There is a web UI to control rTorrent, [jfurrow/flood](https://github.com/jfurrow/flood), also available as a Dockerfile in this project.
+
+### Flood
+This is a web UI for rTorrent available on GitHub: [jfurrow/flood](https://github.com/jfurrow/flood).
+
 
 
 ## Build
@@ -70,7 +74,6 @@ Flood container is using the `proxy` network in order to contact the `traefik` c
 
 ## Before starting
 
-### 1. Import Secrets
 Import all secrets stored as system variables into `SECRET.env` before starting the container.
 
 `SECRET.env` example:
@@ -86,7 +89,7 @@ To import all secrets on the current bash:
 ```
 
 
-### 2. Start all containers
+## Start all containers
 
 Using `docker-compose up -d`:
 
