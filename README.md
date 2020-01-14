@@ -22,10 +22,14 @@ My commandments are:
 I use docker-compose [v2.4](https://docs.docker.com/compose/compose-file/compose-file-v2/) because the [v3 does not allow resource limiting on a docker host non-swarm](https://github.com/docker/compose/issues/4513).
 
 
-## My docker containers
+## Docker containers I use
 
+* [`duplicati`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/duplicati) : Multi-backup solution ([Duplicati](https://github.com/duplicati/duplicati)). <kbd>Debian</kbd>
 * [`ghost`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/ghost) : Simple blog CMS ([Ghost](https://ghost.org/fr/)). <kbd>Distroless</kbd>
+* [`jellyfin`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/jellyfin) : Multimedia web based solution ([Jellyfin](https://github.com/jellyfin/jellyfin)). <kbd>Official image</kbd>
 * [`netdata`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/netdata) : [Netdata](https://github.com/firehol/netdata) is a real-time, performance and health monitoring for systems and applications. <kbd>Alpine</kbd>
+* [`nextcloud`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/nextcloud) : Nextcloud is a self hosted private cloud. <kbd>linuxserver/nextcloud image</kbd>
+* [`pritunl`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/pritunl) : [Pritunl](https://github.com/pritunl/pritunl) is a web interface for managing openvpn servers. <kbd>Alpine</kbd>
 * [`rtorrent`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/seedbox/rtorrent) : A torrent download tool ([rtorrent](https://github.com/rakshasa/rtorrent)). <kbd>Alpine</kbd>
 * [`flood`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/seedbox/flood) : A clean web interface for `rtorrent` ([flood](https://github.com/jfurrow/flood)). <kbd>Distroless</kbd>
 * [`sslh`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/sslh) : Applicative protocol multiplexer ([sslh](https://github.com/yrutschle/sslh)) usefull to use the 443 port with multiple protocols: `https` / `openvpn` / `ssh` / `shadowsocks`. <kbd>Alpine</kbd>
