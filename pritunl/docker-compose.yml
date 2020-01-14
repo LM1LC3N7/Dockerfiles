@@ -1,0 +1,241 @@
+# Version 2.0 mandatory for CPU limiting
+# See: https://github.com/docker/compose/issues/4513
+
+version: '2.4'
+
+
+services:
+
+  # Service name
+  pritunl:
+
+    # Pull from GitHub
+    image: lmilcent/pritunl:1.29.2276.91
+
+    # Container name
+    container_name: pritunl
+
+    # build
+    build:
+      context: build/
+      dockerfile: Dockerfile
+
+    # -------
+    # STARTUP
+    # -------
+
+    # Mode interactive
+    stdin_open: false
+    tty: false
+
+    # no / always / on-failure / unless-stopped
+    restart: unless-stopped
+
+    # Stop delay (1s, 1m30s, etc.) and signal (SIGTERM is default)
+    stop_grace_period: 15s
+    stop_signal: SIGTERM
+
+
+    # ---------------------
+    # LABELS, ENV & VOLUMES
+    # ---------------------
+
+    labels:
+      traefik.enable: true
+      traefik.frontend.rule: "Host:vpn.lmilcent.com"
+      traefik.port: "9700"
+      traefik.backend: "PritunlVPN"
+      traefik.docker.network: "proxy"
+      traefik.frontend.entryPoints: "http,https"
+      traefik.frontend.redirect.entryPoint: "https"
+      traefik.protocol: "https"
+
+    # Environment variables
+    # For secrets with host environment variables
+    #environment: 
+
+    # Public variables
+    env_file: pritunl.env
+      
+    # Volumes
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+ 
+
+    # ---------
+    # RESOURCES
+    # ---------
+
+    # Limit resources
+    cpus: 1
+    mem_limit: 512m
+    memswap_limit: 512m
+
+
+    # -------
+    # NETWORK
+    # -------
+    
+    # Network
+    networks:
+      - proxy
+      - pritunl-backend
+
+    ports:
+      - 1194:1194/udp
+      - 1194:1194/tcp
+      - 443:443/udp
+      - 8081:8081/tcp
+
+
+    # -----
+    # OTHER
+    # -----
+    
+    # Override entrypoints and command
+    #entrypoint: /bin/bash
+    #command: "printenv | grep TEST"
+
+
+    # --------
+    # SECURITY
+    # --------
+    
+    # Drop capabilities (man 7 capabilities for list)
+    # Should drop ALL by default
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - SETGID 
+      - SETUID
+      - KILL
+      - SETPCAP
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SYS_CHROOT
+      - MKNOD
+      - AUDIT_WRITE
+      - SETFCAP
+      - DAC_OVERRIDE
+    # Special rights (like create a TAP network card on the host)
+    privileged: true
+
+
+
+  # Service name
+  mongo:
+
+    # Pull from official repository
+    image: mongo:latest
+
+    # Container name
+    container_name: pritunl-db
+
+
+    # -----------
+    # COMPILATION
+    # -----------
+    #uild:
+    #   context: .
+    #   dockerfile: Dockerfile
+
+
+    # -------
+    # STARTUP
+    # -------
+
+    # Mode interactive
+    stdin_open: false
+
+    # Add a tty
+    tty: false
+
+    # no / always / on-failure / unless-stopped
+    restart: unless-stopped
+
+    # Stop delay (1s, 1m30s, etc.) and signal (SIGTERM is default)
+    stop_grace_period: 15s
+    stop_signal: SIGTERM
+
+
+    # ---------------------
+    # LABELS, ENV & VOLUMES
+    # ---------------------
+
+    #labels:
+
+    # Environment variables
+    # For secrets with host environment variables
+    #environment: 
+    # Public variables
+    #env_file: pritunl.env
+      
+    # Volumes
+    volumes:
+      - /etc/localtime:/etc/localtime:rw
+      - pritunl-db-data:/data/db:rw
+
+
+    # ---------
+    # RESOURCES
+    # ---------
+
+    # Limit resources
+    cpus: 1
+    mem_limit: 256m
+    memswap_limit: 256m
+
+
+    # -------
+    # NETWORK
+    # -------
+    
+    # Network
+    networks:
+      - pritunl-backend
+
+
+    # -----
+    # OTHER
+    # -----
+    
+    # Override entrypoints and command
+    #entrypoint: /bin/sh 
+    #command: "/bin/sh"
+
+
+    # --------
+    # SECURITY
+    # --------
+    
+    # Drop capabilities (man 7 capabilities for list)
+    # Should drop ALL by default
+    cap_drop:
+      - ALL
+
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+
+
+
+# ----------------------------
+# CREATION: NETWORKS & VOLUMES
+# ----------------------------
+volumes:
+  # Join an existing volume
+  pritunl-db-data:
+    name: pritunl-db-data
+
+networks:
+  # Join an existing network
+  proxy:
+    name: proxy
+
+  pritunl-backend:
+    name: pritunl-backend
