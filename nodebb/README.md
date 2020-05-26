@@ -43,6 +43,7 @@ Before starting a new instance:
   - the configuration should be updated in `rootfs/nodebb/config.json` to suits your needs
   - the URL has to be updated in `SECRET.env` (used only for traefik)
   - a Redis password should be set in `SECRET.env`
+  - update the plugin to install list in `rootfs/etc/`
 
 **SECRET.env**
 
@@ -78,8 +79,14 @@ An example is provided in `rootfs/nodebb/config.example.json`.
     "database": "0"
   }
 }
+
 ```
 
+**active-plugins**
+
+```bash
+nodebb-plugin-custom-registration-fields
+```
 
 ## Start
 At first startup, NodeBB is installed, built and started.
