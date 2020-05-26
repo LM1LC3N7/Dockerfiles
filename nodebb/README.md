@@ -28,26 +28,27 @@ docker images <image>:<tag>
 * **Based on:** Alpine
 * **Layers:** 10
 * **Size:** 563 Mio (including 453Mio for dependencies)
-* **Startup time:** 40 seconds (depend on the build time)
+* **Startup time:** 40 to 60 seconds (depend on the build time and plugins number)
 * **Auto-restart:** yes
 * **Time Synchronization** yes
-* **Hardware limitations:** 2 CPU, 1512 Mio RAM, no SWAP
+* **Hardware limitations:** 4 CPU, 1512 Mio RAM, no SWAP
 * **Low privileges** yes
-* **Capabilities limitations:** none
+* **Capabilities limitations:** yes
 
 This image is using the `proxy` network in order to contact the `traefik` container (a proxy service) and is also connected to `nodebb-backend` to contact the database.
 
 
 ## Before starting
 Before starting a new instance:
-  - the configuration should be updated in `rootfs/nodebb/config.json` to suit your needs
-  - the URL has to be updated in `SECRET.env`
-
+  - the configuration should be updated in `rootfs/nodebb/config.json` to suits your needs
+  - the URL has to be updated in `SECRET.env` (used only for traefik)
+  - a Redis password should be set in `SECRET.env`
 
 **SECRET.env**
 
 ```bash
-declare -x NODEBB_URL="https://sub.domain.tld"
+declare -x NODEBB_URL="sub.domain.tld"
+declare -x NODEBB_REDIS_PASSWORD="something-random-7pNdBYTzdT58EWkA9R9KGSQ"
 ```
 
 An example is provided in `rootfs/nodebb/config.example.json`.
