@@ -1,0 +1,216 @@
+# Version 2.0 mandatory for CPU limiting
+# See: https://github.com/docker/compose/issues/4513
+
+version: '2.4'
+
+
+services:
+
+  # Service name
+  nodebb:
+
+    # Build with github clone
+    image: lmilcent/nodebb:alpine
+
+    # Container name
+    container_name: nodebb
+
+
+    # -----------
+    # COMPILATION
+    # -----------
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+
+    # -------
+    # STARTUP
+    # -------
+
+    # Mode interactive
+    stdin_open: false
+
+    # Add a tty
+    tty: false
+
+    # no / always / on-failure / unless-stopped
+    restart: unless-stopped
+
+    # Stop delay (1s, 1m30s, etc.) and signal (SIGTERM is default)
+    stop_grace_period: 15s
+    stop_signal: SIGTERM
+
+
+    # ---------------------
+    # LABELS, ENV & VOLUMES
+    # ---------------------
+
+    labels:
+      traefik.enable: true
+      traefik.frontend.rule: Host:${NODEBB_URL}
+      traefik.port: "4567"
+      traefik.backend: "NodeBB"
+      traefik.docker.network: "proxy"
+      traefik.frontend.entryPoints: "http,https"
+      traefik.frontend.redirect.entryPoint: "https"
+      traefik.protocol: "http"
+
+    environment:
+      - REDIS_PASSWORD=${NODEBB_REDIS_PASSWORD}
+
+    # Volumes
+    volumes:
+      - nodebb-config:/etc/nodebb:rw
+      - nodebb-uploads:/nodebb/public/uploads
+
+
+    # ---------
+    # RESOURCES
+    # ---------
+
+    # Limit resources
+    cpus: 4
+    cpu_shares: 4096
+    mem_limit: 1512m
+    memswap_limit: 1512m
+
+
+    # -------
+    # NETWORK
+    # -------
+    
+    # Network
+    networks:
+      - proxy
+      - nodebb-backend
+
+
+    # -----
+    # OTHER
+    # -----
+    
+    # Override entrypoints and command
+    #entrypoint: /bin/bash
+    #command: "printenv | grep TEST"
+
+
+    # --------
+    # SECURITY
+    # --------
+    
+    # Drop capabilities (man 7 capabilities for list)
+    # Should drop ALL by default
+    cap_drop:
+      - ALL
+
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - KILL
+
+
+  # https://hub.docker.com/r/bitnami/redis
+  nodebb-redis:
+
+    image: bitnami/redis:6.0
+
+    # Container name
+    container_name: nodebb-redis
+
+
+    # -------
+    # STARTUP
+    # -------
+
+    # Mode interactive
+    stdin_open: false
+
+    # Add a tty
+    tty: false
+
+    # no / always / on-failure / unless-stopped
+    restart: unless-stopped
+
+    # Stop delay (1s, 1m30s, etc.) and signal (SIGTERM is default)
+    stop_grace_period: 15s
+    stop_signal: SIGTERM
+
+
+    # ---------------------
+    # LABELS, ENV & VOLUMES
+    # ---------------------
+
+    environment:
+      - DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
+      - REDIS_PASSWORD=${NODEBB_REDIS_PASSWORD} 
+
+    # Volumes
+    volumes:
+      - nodebb-redis:/bitnami/redis/data
+
+
+    # ---------
+    # RESOURCES
+    # ---------
+
+    # Limit resources
+    cpus: 1
+    mem_limit: 512m
+    memswap_limit: 512m
+
+
+    # -------
+    # NETWORK
+    # -------
+    
+    # Network
+    networks:
+      - nodebb-backend
+
+
+    # -----
+    # OTHER
+    # -----
+    
+    # Override entrypoints and command
+    #entrypoint: /bin/bash
+    #command: "printenv | grep TEST"
+
+
+    # --------
+    # SECURITY
+    # --------
+    
+    # Drop capabilities (man 7 capabilities for list)
+    # Should drop ALL by default
+    cap_drop:
+      - ALL
+
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - SETGID
+      - SETUID
+  
+
+
+# ----------------------------
+# CREATION: NETWORKS & VOLUMES
+# ----------------------------
+volumes:
+  nodebb-config:
+    name: nodebb-config
+  nodebb-uploads:
+    name: nodebb-uploads
+  nodebb-redis:
+    name: nodebb-redis
+
+networks:
+  # Join an existing network
+  proxy:
+    name: proxy
+  nodebb-backend:

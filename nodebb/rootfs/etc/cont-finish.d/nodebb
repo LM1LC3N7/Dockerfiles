@@ -1,0 +1,19 @@
+#!/usr/bin/with-contenv sh
+
+cd /nodebb
+
+# Export the plugin list
+echo "[*] Exporting active plugin list"
+exec s6-setuidgid nodebb \
+  node ./nodebb plugins | tail -n +2 | cut -c4- | sed -r 's/( .*$)//g' > /etc/nodebb/active-plugins
+
+# Script called for shutdown
+echo "[*] Shutting down NodeBB with NodeBB cli"
+exec s6-setuidgid nodebb \
+  node ./nodebb stop
+
+# Backup config file if modified
+[ -e /etc/nodebb/config.json ] || cp /opt/nodebb/config.json /etc/nodebb/config.json
+echo "[*] NodeBB Stopped"
+
+exit 0

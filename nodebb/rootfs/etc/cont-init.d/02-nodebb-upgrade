@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv sh
+cd /nodebb
+if [ -e /etc/nodebb/config.json ] ; then
+  echo "[*] Running NodeBB upgrade"
+  exec s6-setuidgid nodebb node ./nodebb upgrade
+fi

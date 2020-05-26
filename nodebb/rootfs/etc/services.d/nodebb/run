@@ -1,0 +1,45 @@
+#!/usr/bin/with-contenv sh
+
+# Init
+echo "-----------------------------------------------"
+echo "   _             _  _                     _ "
+echo "  | |           (_)| |                   | |"
+echo "  | | _ __ ___   _ | |  ___   ___  _ __  | |_"
+echo "  | || '_ \ _ \ | || | / __| / _ \| '_ \ | __|"
+echo "  | || | | | | || || || (__ |  __/| | | || |_"
+echo "  |_||_| |_| |_||_||_| \___| \___||_| |_| \__|"
+echo ""
+echo "-----------------------------------------------"
+echo " Application : nodebb"
+echo " Running user: nodebb"
+echo " Base OS     : Alpine"
+echo "-----------------------------------------------"
+echo " NodeBB configuration"
+echo "   - Installation path  : /nodebb"
+echo "   - Running as user    : nodebb"
+echo "   - UID & GID          : 991"
+echo "   - Configuration file : /etc/nodebb/config.json"
+echo "-----------------------------------------------"
+
+cd /nodebb
+
+# If this is a new install, print the generated admin password
+if [ -e /nodebb/logs/setup.log ] ; then
+  isAdminPassword=$(cat logs/setup.log  | grep "Username: admin")
+  if [ ${#isAdminPassword} -gt 1 ] ; then
+    echo
+    echo "-------------------------------"
+    echo "[*] New installation detected."
+    echo
+    tail -5 logs/setup.log | head -n-2
+    echo
+    echo "-------------------------------"
+    echo
+  fi
+fi
+
+# Start NodeBB with lower rights
+echo "[*] Starting Nodebb"
+exec s6-setuidgid nodebb \
+  node ./nodebb start
+

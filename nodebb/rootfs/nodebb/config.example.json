@@ -1,0 +1,22 @@
+{
+  "url": "https://sub.domain.tld",
+  "secret": "some-random-password-E9d0g%8DQKiQe5AiWobVU9",
+  "database": "redis",
+  "redis": {
+    "host": "nodebb-redis",
+    "port": "6379",
+    "password": "",
+    "database": "0"
+  },
+  "port": "4567",
+  "bcrypt_rounds": "21",
+  "bind_address": "0.0.0.0",
+  "isCluster": "false",
+  "session_store": {
+    "name": "redis",
+    "host": "nodebb-redis",
+    "port": "6379",
+    "password": "",
+    "database": "0"
+  }
+}

@@ -1,0 +1,18 @@
+#!/usr/bin/with-contenv sh
+
+echo "[*] Checking NodeBB user configuration file."
+
+if [ -e /etc/nodebb/config.json ] ; then
+  echo "-> User configuration file detected"
+  rm -f /nodebb/config.json
+  ln -s /etc/nodebb/config.json /nodebb/config.json
+fi
+
+# Replace password in config.json if an environment password is set
+echo "[*] Updating ENV redis password in configuration file"
+
+if [ ${#REDIS_PASSWORD} -eq 0  ] ; then
+  REDIS_PASSWORD=""
+fi
+
+sed -i "s/password.*/password\": \"$REDIS_PASSWORD\",/g" /nodebb/config.json

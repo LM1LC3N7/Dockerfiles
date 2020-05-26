@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Because clicking on "start NodeBB" on the web interface
+# is not killing some node processes, this need to be killed
+# in order to start NodeBB correctly.
+
+echo "[*] Stopping all node processes before starting NodeBB"
+killPids=$(ps -a -o pid,user | grep nodebb | awk '{print $1}')
+
+if [ ${#killPids} -gt 0 ] ; then
+  kill $killPids
+fi
