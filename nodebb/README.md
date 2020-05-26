@@ -96,7 +96,8 @@ Using `docker-compose up -d`, don't forget to call `SECRET.env` first:
 
 ```bash
 $ . SECRET.env
-$ docker-compose up -d 
+$ docker-compose up -d
+$ docker logs -f nodebb
 [..] (NodeBB build logs)
 nodebb    | [services.d] starting services
 nodebb    | -----------------------------------------------
