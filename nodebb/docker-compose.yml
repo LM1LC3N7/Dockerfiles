@@ -48,7 +48,7 @@ services:
 
     labels:
       traefik.enable: true
-      traefik.frontend.rule: Host:${NODEBB_URL}
+      traefik.frontend.rule: Host:${NODEBB_TRAEFIK_URL}
       traefik.port: "4567"
       traefik.backend: "NodeBB"
       traefik.docker.network: "proxy"
@@ -63,7 +63,7 @@ services:
     volumes:
       - nodebb-config:/etc/nodebb:rw
       - nodebb-uploads:/nodebb/public/uploads
-
+      - /etc/localtime:/etc/localtime:ro
 
     # ---------
     # RESOURCES
