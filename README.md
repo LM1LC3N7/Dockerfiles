@@ -29,6 +29,7 @@ I use docker-compose [v2.4](https://docs.docker.com/compose/compose-file/compose
 * [`jellyfin`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/jellyfin) : Multimedia web based solution ([Jellyfin](https://github.com/jellyfin/jellyfin)). <kbd>Official image</kbd>
 * [`netdata`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/netdata) : [Netdata](https://github.com/firehol/netdata) is a real-time, performance and health monitoring for systems and applications. <kbd>Alpine</kbd>
 * [`nextcloud`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/nextcloud) : Nextcloud is a self hosted private cloud. <kbd>linuxserver/nextcloud image</kbd>
+* [`nodebb`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/nodebb) : NodeBB is the "next generation forum" using web sockets for instant interactions. <kbd>Alpine</kbd>
 * [`pritunl`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/pritunl) : [Pritunl](https://github.com/pritunl/pritunl) is a web interface for managing openvpn servers. <kbd>Alpine</kbd>
 * [`rtorrent`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/seedbox/rtorrent) : A torrent download tool ([rtorrent](https://github.com/rakshasa/rtorrent)). <kbd>Alpine</kbd>
 * [`flood`](https://github.com/LM1LC3N7/Dockerfiles/tree/master/seedbox/flood) : A clean web interface for `rtorrent` ([flood](https://github.com/jfurrow/flood)). <kbd>Distroless</kbd>
