@@ -89,10 +89,31 @@ Note: The redis password will automatically be updated by the environment variab
 **active-plugins**
 
 ```bash
-nodebb-plugin-add-registration-fields
-nodebb-plugin-custom-registration-fields
+nodebb-plugin-2factor
+nodebb-plugin-browsing-users
+nodebb-plugin-composer-default
+nodebb-plugin-custom-homepage
 nodebb-plugin-dbsearch
+nodebb-plugin-emoji
+nodebb-plugin-emoji-android
+nodebb-plugin-emoji-one
+nodebb-plugin-iframely
+nodebb-plugin-imagemagick
+nodebb-plugin-markdown
+nodebb-plugin-mentions
+nodebb-plugin-recent-cards
 nodebb-plugin-registration-notification
+nodebb-plugin-soundpack-default
+nodebb-plugin-spam-be-gone
+nodebb-plugin-sso-facebook
+nodebb-plugin-sso-google
+nodebb-plugin-tenor-gif
+nodebb-rewards-essentials
+nodebb-theme-lavender
+nodebb-theme-persona
+nodebb-theme-slick
+nodebb-theme-vanilla
+nodebb-widget-essentials
 ```
 
 ## Start
