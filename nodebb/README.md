@@ -1,49 +1,51 @@
 # NodeBB
 
 NodeBB is the "next generation forum". It utilizes web sockets for instant interactions and real-time notifications.
+This image:
+* allow to use the `restart` and `build` buttons from NodeBB web interface
+* start NodeBB with users rights (not as root)
+* updates plugins and the OS at boot
 
 
-## Build
-This docker image automatically download the last version from the [GitHub main project](https://github.com/NodeBB/NodeBB).
+## Build the image
+This docker image automatically download the last version of NodeBB from [GitHub](https://github.com/NodeBB/NodeBB).
+The last version of [S6-overlay](https://github.com/just-containers/s6-overlay/releases) is also downloaded and installed.
+Lastly, the build is using multi-stage to reduce the final image weight and layers number to improve performances.
+
+<!--
+To get image details, use:
+docker image inspect <image> -f '{{.RootFS.Layers}}' | wc -w
+docker images <image>:<tag>
+-->
 
 * **Base image:** node:12-alpine
-* **NodeBB version:** Last version available on GitHub
+* **NodeBB version:** Last version available on GitHub (master branch)
 * **Multi-stage:** Yes
+* **Layers:** 10
+* **Size:** 563 Mio (including 453Mio for dependencies)
 * **Supervisor:** Yes (s6-overlay)
+* **Startup time:** 40 to 60 seconds (depend on the build time and plugins number)
+* **Auto-restart:** yes
+* **Time Synchronization** yes
+* **Hardware limitations:** 4 CPU, 1512 Mio RAM, no SWAP
+* **Low privileges:** yes
+* **Capabilities limitations:** yes
 
-Command:
+Build command:
 
 ```bash
 docker-compose build nodebb
 ```
 
-
-## Image details
-
-<!-- Use:
-docker image inspect <image> -f '{{.RootFS.Layers}}' | wc -w
-docker images <image>:<tag>
--->
-
-* **Based on:** Alpine
-* **Layers:** 10
-* **Size:** 563 Mio (including 453Mio for dependencies)
-* **Startup time:** 40 to 60 seconds (depend on the build time and plugins number)
-* **Auto-restart:** yes
-* **Time Synchronization** yes
-* **Hardware limitations:** 4 CPU, 1512 Mio RAM, no SWAP
-* **Low privileges** yes
-* **Capabilities limitations:** yes
-
-This image is using the `proxy` network in order to contact the `traefik` container (a proxy service) and is also connected to `nodebb-backend` to contact the database.
+This image is using the `proxy` network in order to contact the `traefik` container (a proxy service) and is also connected to `nodebb-backend` to contact the database on a separate network.
 
 
 ## Before starting
 Before starting a new instance:
   - the configuration should be updated in `rootfs/nodebb/config.json` to suits your needs
   - the URL has to be updated in `SECRET.env` (used only for traefik)
-  - a Redis password should be set in `SECRET.env`
-  - update the plugin to install list in `rootfs/etc/`
+  - a Redis password should be set in `SECRET.env` for both containers redis and nodebb
+  - update the plugin to install list in `rootfs/etc/nodebb/active-plugins`
 
 **SECRET.env**
 
@@ -55,6 +57,8 @@ declare -x NODEBB_REDIS_PASSWORD="something-random-7pNdBYTzdT58EWkA9R9KGSQ"
 An example is provided in `rootfs/nodebb/config.example.json`.
 
 **config.json**
+
+Note: The redis password will automatically be updated by the environment variable for `redis` and `session_store`.
 
 ```bash
 {
@@ -85,14 +89,27 @@ An example is provided in `rootfs/nodebb/config.example.json`.
 **active-plugins**
 
 ```bash
+nodebb-plugin-add-registration-fields
 nodebb-plugin-custom-registration-fields
+nodebb-plugin-dbsearch
+nodebb-plugin-registration-notification
 ```
 
 ## Start
 At first startup, NodeBB is installed, built and started.
-A random admin password is generated for the first time. 
+A random admin password is generated for the first time.
 
-Using `docker-compose up -d`, don't forget to call `SECRET.env` first:
+Startup workflow:
+1. OS upgrade
+2. Configuration update and redis password update using the environment variable
+3. NodeBB upgrade if needed (for configuration changes)
+4. NodeBB setup (for first installation) and build
+5. Kill all remaining processes (a bug it seems)
+6. Installing and activating all plugins listed in `active-plugins`
+7. Starting NodeBB
+8. When the container is stopped, saving a list of all installed plugins and the configuration file
+
+To start the container:
 
 ```bash
 $ . SECRET.env
