@@ -50,7 +50,7 @@ Before starting a new instance:
 **SECRET.env**
 
 ```bash
-declare -x NODEBB_URL="sub.domain.tld"
+declare -x NODEBB_TRAEFIK_URL="sub.domain.tld"
 declare -x NODEBB_REDIS_PASSWORD="something-random-7pNdBYTzdT58EWkA9R9KGSQ"
 ```
 
