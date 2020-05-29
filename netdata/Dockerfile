@@ -20,9 +20,12 @@ RUN echo \
       libmnl-dev \
       util-linux-dev \
       zlib-dev \
+      json-c-dev \
+      libuv-dev \
       libmnl \
       libuuid \
       bash \
+      pkgconfig \
  && echo \
  && echo "[*] Creating netdata user and group" \
  && addgroup -g ${PGID} netdata \
