@@ -10,7 +10,7 @@ services:
   flood:
 
     # Build with github clone
-    image: lmilcent/flood:20191219-distroless
+    image: lmilcent/flood:20200416-distroless
 
     # Container name
     container_name: flood
@@ -124,7 +124,7 @@ services:
   rtorrent:
 
     # Build with github clone
-    image: lmilcent/rtorrent:alpine
+    image: lmilcent/rtorrent-20200416:alpine
 
     # Container name
     container_name: rtorrent
