@@ -2,7 +2,7 @@
 
 echo "[*] Fixing ownership."
 find /app -not -user flood -not -group flood -exec chown flood:flood {} \;
-chmod flood:flood /incomplete
+chown flood:flood /incomplete
 find /incomplete -not -user flood -not -group flood -exec chown flood:flood {} \;
 
 echo "[*] Fixing permissions."
