@@ -1,2 +1,2 @@
-/app false rtorrent:rtorrent,991:991 0666 0755
-/app/rtorrent true rtorrent:rtorrent,991:991 0666 0755
+/app false rtorrent:rtorrent,9991:9991 0666 0755
+/app/rtorrent true rtorrent:rtorrent,9991:9991 0666 0755
