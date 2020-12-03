@@ -2,8 +2,8 @@ FROM alpine:latest
 
 ENV S6_FIX_ATTRS_HIDDEN=1 \
    RTORRENT_HOME=/app/rtorrent \
-   UID=991 \
-   GID=991 \
+   UID=9991 \
+   GID=9991 \
    TERM=xterm
 
 COPY rootfs /

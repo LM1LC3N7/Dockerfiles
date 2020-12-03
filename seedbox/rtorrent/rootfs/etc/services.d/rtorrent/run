@@ -34,3 +34,4 @@ until [ -f log/rtorrent-*.log ] ; do
 done
 
 tail -f s6-start.log log/execute.log log/rtorrent-*.log
+

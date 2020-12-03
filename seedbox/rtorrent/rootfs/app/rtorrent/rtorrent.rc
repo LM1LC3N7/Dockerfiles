@@ -10,9 +10,14 @@
 ## Instance layout (base paths)
 # Base dir is set in docker env using RTORRENT_HOME
 method.insert = cfg.basedir,  private|const|string, (cat, "/app/rtorrent")
-method.insert = cfg.download, private|const|string, (cat,(cfg.basedir),"/download/")
+method.insert = cfg.download, private|const|string, (cat,(cfg.basedir),"/downloads/")
+method.insert = cfg.incomplete, private|const|string, (cat,(cfg.download),"/incomplete/")
+method.insert = cfg.dltvshows,  private|const|string, (cat,(cfg.download),"/tvshows/")
+method.insert = cfg.dlmovies,   private|const|string, (cat,(cfg.download),"/movies/")
+method.insert = cfg.tvshows,  private|const|string, "/tvshows/"
+method.insert = cfg.movies,   private|const|string, "/movies/"
 method.insert = cfg.logs,     private|const|string, (cat,(cfg.basedir),"/log/")
-method.insert = cfg.logfile,  private|const|string, (cat,(cfg.logs),"rtorrent-",(system.time),".log")
+method.insert = cfg.logfile,  private|const|string, (cat,(cfg.logs),"rtorrent-",".log")
 method.insert = cfg.session,  private|const|string, (cat,(cfg.basedir),"/session/")
 method.insert = cfg.watch,    private|const|string, (cat,(cfg.basedir),"/watch/")
 
@@ -93,6 +98,7 @@ encoding_list = UTF-8
 encoding.add = utf8
 # SET CHMOD 777
 system.umask.set = 0000
+#system.umask.set = 0027
 system.cwd.set = (directory.default)
 network.http.dns_cache_timeout.set = 25
 schedule2 = monitor_diskspace, 15, 60, ((close_low_diskspace, 1000M))
@@ -135,8 +141,22 @@ network.scgi.open_port = 0.0.0.0:5000
 ##   Groups = connection_* dht_* peer_* rpc_* storage_* thread_* tracker_* torrent_*
 print = (cat, "Logging to ", (cfg.logfile))
 log.open_file = "log", (cfg.logfile)
-log.add_output = "info", "log"
+#log.add_output = "info", "log"
+log.add_output = "debug", "log"
 #log.add_output = "tracker_debug", "log"
+
+
+
+
+# default path for in progress downloads
+directory = (cat, (cfg.incomplete))
+
+# Move completed files
+# From cfg.tvshows to /tvshows
+#method.insert = d.move_to_complete, simple, "d.directory.set=$argument.1=; execute=mkdir,-p,$argument.1=; execute=mv,-u,$argument.0=,$argument.1=; d.save_full_session="
+#method.set_key = event.download.finished,move_complete,"d.move_to_complete=$d.data_path=,$d.custom1="
+#schedule = watch_directory_tvshows,30,30,"load_start_verbose=(cfg.dltvshows),d.set_directory=(cfg.tvshows)"
+#schedule = watch_directory_movies,30,30,"load_start_verbose=(cfg.dlmovies),d.set_directory=(cfg.movies)"
 
 ### END of rtorrent.rc ###
 

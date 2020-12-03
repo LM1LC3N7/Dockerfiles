@@ -1,0 +1,32 @@
+#!/usr/bin/with-contenv sh
+
+# Init
+echo "-----------------------------------------------"
+echo "   _             _  _                     _ "
+echo "  | |           (_)| |                   | |"
+echo "  | | _ __ ___   _ | |  ___   ___  _ __  | |_"
+echo "  | || '_ \ _ \ | || | / __| / _ \| '_ \ | __|"
+echo "  | || | | | | || || || (__ |  __/| | | || |_"
+echo "  |_||_| |_| |_||_||_| \___| \___||_| |_| \__|"
+echo ""
+echo "-----------------------------------------------"
+echo " Application : flood"
+echo " Running user: flood"
+echo " Base OS     : Alpine"
+echo "-----------------------------------------------"
+echo " Flood configuration"
+echo "   - Installation path  : /app/flood"
+echo "   - Running as user    : flood"
+echo "   - UID & GID          : 9991"
+echo "   - Configuration file : /app/flood/config.json"
+echo "-----------------------------------------------"
+
+cd /app/flood
+
+export HOME=/app/flood
+export NODE_ENV=production
+
+# Start Flood with lower rights
+echo "[*] Starting Flood"
+exec s6-setuidgid flood \
+  node server/bin/start.js

@@ -1,37 +1,21 @@
 # Version 2.0 mandatory for CPU limiting
 # See: https://github.com/docker/compose/issues/4513
-
 version: '2.4'
-
 
 services:
 
-  # Service name
   flood:
 
-    # Build with github clone
-    image: lmilcent/flood:20200416-distroless
-
-    # Container name
+    image: lmilcent/flood:20201203-alpine
     container_name: flood
 
-
-    # -----------
-    # COMPILATION
-    # -----------
+    # Compilation
     build:
-        context: ./flood/
-        dockerfile: Dockerfile
-
-
-    # -------
-    # STARTUP
-    # -------
+      context: ./flood/
+      dockerfile: Dockerfile
 
     # Mode interactive
     stdin_open: false
-
-    # Add a tty
     tty: false
 
     # no / always / on-failure / unless-stopped
@@ -41,73 +25,42 @@ services:
     stop_grace_period: 15s
     stop_signal: SIGTERM
 
-
-    # ---------------------
-    # LABELS, ENV & VOLUMES
-    # ---------------------
-
     labels:
       traefik.enable: true
-      traefik.frontend.rule: "Host:dl.lmilcent.com"
-      traefik.port: "3000"
-      traefik.backend: "rTorrent"
-      traefik.docker.network: "proxy"
-      traefik.frontend.entryPoints: "http,https"
-      traefik.frontend.redirect.entryPoint: "https"
-      traefik.protocol: "http"
+      traefik.http.routers.flood.entrypoints: websecure,web
+      traefik.http.routers.flood.rule: Host(`dl.lmilcent.com`) || Host(`dl.milcent.co`)
+      # TLS
+      traefik.http.routers.flood.tls.certresolver: certMilcent
+      # already applied?
+      #traefik.http.routers.flood.tls.options: TLSOptions@file
+      # Middlewares & Services
+      traefik.http.routers.flood.middlewares: flood-compress
+      traefik.http.middlewares.flood-compress.compress: true
+      # Container communication
+      traefik.http.services.flood.loadbalancer.server.port: 3000
+      traefik.http.services.flood.loadbalancer.server.scheme: http
 
-    # Environment variables
-    # For secrets with host environment variables
-    #environment: 
-    #  TEST_ENV_SECRET: ${ENV_SECRET}
     # Public variables
-    env_file: ./flood/default.env
+    environment:
+      FLOOD_SECRET: ${FLOOD_SECRET}
       
-    # Volumes
+    # Volume
+    # SELinux labels: Z = not shared, z = shared)
     volumes:
-      - rtorrent-flood-db:/app/flood/flood-db:rw
+      - /data/containers-data/flood:/app/flood/flood-db:z
     volumes_from:
       - rtorrent
 
-
-    # ---------
-    # RESOURCES
-    # ---------
-
     # Limit resources
-    cpus: 0.5
-    mem_limit: 150m
-    memswap_limit: 150m
-
-
-    # -------
-    # NETWORK
-    # -------
-    
-    # Expose port to linked services (internal only)
-    #expose:
-    
-    # Expose port to ALL
-    #ports:
+    cpus: 1
+    mem_limit: 256m
+    memswap_limit: 256m
+    pids_limit: 50 # 11 usually
 
     # Network
     networks:
       - proxy
       - rtorrent-backend
-
-
-    # -----
-    # OTHER
-    # -----
-    
-    # Override entrypoints and command
-    #entrypoint: /bin/bash
-    #command: "printenv | grep TEST"
-
-
-    # --------
-    # SECURITY
-    # --------
     
     # Drop capabilities (man 7 capabilities for list)
     # Should drop ALL by default
@@ -116,36 +69,25 @@ services:
 
     cap_add:
       - DAC_OVERRIDE
-
+      - CHOWN
+      - FOWNER
+      - SETUID
+      - SETGID
 
 
 
   # Service name
   rtorrent:
 
-    # Build with github clone
-    image: lmilcent/rtorrent-20200416:alpine
-
-    # Container name
+    image: lmilcent/rtorrent:20201203-alpine
     container_name: rtorrent
 
-
-    # -----------
-    # COMPILATION
-    # -----------
     build:
-        context: ./rtorrent/
-        dockerfile: Dockerfile
-
-
-    # -------
-    # STARTUP
-    # -------
+      context: ./rtorrent/
+      dockerfile: Dockerfile
 
     # Mode interactive
     stdin_open: false
-
-    # Add a tty
     tty: true
 
     # no / always / on-failure / unless-stopped
@@ -155,61 +97,24 @@ services:
     stop_grace_period: 10s
     stop_signal: SIGTERM
 
-
-    # ---------------------
-    # LABELS, ENV & VOLUMES
-    # ---------------------
-
-    #labels:
-
-    # Environment variables
-    env_file: ./rtorrent/default.env
-      
     # Volumes
     volumes:
-      - /data/medias/downloaded:/app/rtorrent/download:rw
-      - rtorrent-config:/app/rtorrent/config:rw
-
-
-    # ---------
-    # RESOURCES
-    # ---------
+      - /data/containers-data/rtorrent/downloaded/incomplete:/incomplete:z
+      - /data/containers-data/rtorrent/config:/app/rtorrent/config:z
+      - /data/containers-data/jellyfin/tvshows:/tvshows:z
+      - /data/containers-data/jellyfin/movies:/movies:z
 
     # Limit resources
     cpus: 2
     mem_limit: 1024m
     memswap_limit: 1024m
-
-
-    # -------
-    # NETWORK
-    # -------
-    
-    # Expose port to linked services (internal only)
-    #expose:
-    
-    # Expose port to ALL
-    #ports:
+    pids_limit: 50 # 10 usually but 25+ on startup
 
     # Network
     networks:
       - proxy
       - rtorrent-backend
 
-
-    # -----
-    # OTHER
-    # -----
-    
-    # Override entrypoints and command
-    #entrypoint: /bin/bash
-    #command: "printenv | grep TEST"
-
-
-    # --------
-    # SECURITY
-    # --------
-    
     # Drop capabilities (man 7 capabilities for list)
     # Should drop ALL by default
     cap_drop:
@@ -223,17 +128,8 @@ services:
       - DAC_OVERRIDE
 
 
-# ----------------------------
-# CREATION: NETWORKS & VOLUMES
-# ----------------------------
-volumes:
-  rtorrent-flood-db:
-    name: rtorrent-flood-db
-  rtorrent-config:
-    name: rtorrent-config
-
+# Network definitions
 networks:
-  # Join an existing network
   proxy:
     name: proxy
 

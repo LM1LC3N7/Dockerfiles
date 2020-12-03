@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv sh
+
+echo "[*] Fixing ownership."
+find /app -not -user flood -not -group flood -exec chown flood:flood {} \;
+chmod flood:flood /incomplete
+find /incomplete -not -user flood -not -group flood -exec chown flood:flood {} \;
+
+echo "[*] Fixing permissions."
+chmod ug+rwx /app /app/flood
+find /app/flood -type d -not -perm 0770 -exec chmod 0770 {} \;
+find /app/flood -type f -not -perm 0660 -exec chmod 0660 {} \;
+find /incomplete -type f -not -perm 0660 -exec chmod 0660 {} \;
