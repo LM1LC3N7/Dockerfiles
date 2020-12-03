@@ -80,6 +80,9 @@ Using `docker-compose up -d`:
 ```bash
 $ . SECRET.env
 $ docker-compose up -d 
+```
+
+```bash
 $ docker logs -f rtorrent
 [s6-init] making user provided files available at /var/run/s6/etc...exited 0.
 [s6-init] ensuring user provided files have correct perms...exited 0.
@@ -127,7 +130,10 @@ sh -c echo >/app/rtorrent/session/rtorrent.pid 337
 1607004082 D could not open input history file (path:/app/rtorrent/session/rtorrent.input_history)
 1607004082 N rtorrent main: Starting thread.
 1607004082 N rtorrent scgi: Starting thread.
+```
 
+
+```bash
 $ docker logs -f flood
 [s6-init] making user provided files available at /var/run/s6/etc...exited 0.
 [s6-init] ensuring user provided files have correct perms...exited 0.
