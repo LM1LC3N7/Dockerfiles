@@ -16,65 +16,51 @@ This is a web UI for rTorrent available on GitHub: [jfurrow/flood](https://githu
 
 
 
-## Build
+## Build & Image details
 
 **rTorrent:**
 
 * **Base image:** Alpine linux
 * **`rtorrent` version:** Last version available on [edge testing alpine repository](http://dl-cdn.alpinelinux.org/alpine/edge/main)
-* **Multi-stage:** No
 * **Supervisor:** Yes, [`s6-overlay`](https://github.com/just-containers/s6-overlay#goals)
+* **Multi-stage:** No
+* **Layers:** 3
+* **Size:** 23,8 Mio
+* **Startup time:** 8 seconds
+* **Auto-restart:** yes
+* **Time Synchronization** yes, with host
+* **Hardware limitations:** 2 CPU, 1024 Mio RAM, no SWAP, 50 pids max.
+* **Low privileges** yes, running using `rtorrent` user.
+* **Capabilities limitations:** `chown`, `fowner`, `setuid`, `dac_override`
 
 
 **flood:**
 
 * **Base image:** Distroless
 * **`flood` version:** Last version available on the GitHub project
+* **Supervisor:** Yes, [`s6-overlay`](https://github.com/just-containers/s6-overlay#goals)
 * **Multi-stage:** Yes
-* **Supervisor:** No
+* **Layers:** 7
+* **Size:** 450 Mio
+* **Startup time:** 10 seconds
+* **Auto-restart:** yes
+* **Time Synchronization** no
+* **Hardware limitations:** 1 CPU, 256 Mio RAM, no SWAP, 50 pids max.
+* **Low privileges** yes, running using `flood` user.
+* **Capabilities limitations:** `chown`, `fowner`, `setuid`, `dac_override`
+
 
 
 Command to build:
 
 ```bash
-docker-compose build rtorrent
-docker-compose build flood
+docker-compose build
 ```
-
-
-## Image details
-
-**rTorrent:**
-
-* **Based on:** Alpine Linux
-* **Layers:** 3
-* **Size:** 32,6 Mio
-* **Startup time:** 8 seconds
-* **Auto-restart:** yes
-* **Time Synchronization** yes, with host
-* **Hardware limitations:** 2 CPU, 1024 Mio RAM, no SWAP
-* **Low privileges** yes, running using `rtorrent` user
-* **Capabilities limitations:** `chown`, `fowner`, `setuid`, `dac_override`
-
-
-**flood:**
-
-* **Based on:** Distroless
-* **Layers:** 6
-* **Size:** 363 Mio
-* **Startup time:** 10 seconds
-* **Auto-restart:** yes
-* **Time Synchronization** no
-* **Hardware limitations:** 0.5 CPU, 150 Mio RAM, no SWAP
-* **Low privileges** no
-* **Capabilities limitations:** `dac_override`
-
-Flood container is using the `proxy` network in order to contact the `traefik` container (a proxy service) and is also connected to `rtorrent-backend` (as rtorrent) to contact rTorrent service.
 
 
 ## Before starting
 
-Import all secrets stored as system variables into `SECRET.env` before starting the container.
+Import all secrets stored as system variables into `SECRET.env` for `bash` and `SECRET.fish.env` for `fish shell`, before starting the container.
 
 `SECRET.env` example:
 
@@ -89,16 +75,14 @@ To import all secrets on the current bash:
 ```
 
 
+
 ## Start all containers
 
 Using `docker-compose up -d`:
 
 ```bash
-$ . flood/SECRET.env
-$ . rtorrent/SECRET.env
+$ . SECRET.env
 $ docker-compose up -d 
-$ docker logs -f flood
-Flood server starting on http://0.0.0.0:3000.
 $ docker logs -f rtorrent
 [s6-init] making user provided files available at /var/run/s6/etc...exited 0.
 [s6-init] ensuring user provided files have correct perms...exited 0.
@@ -135,13 +119,54 @@ $ docker logs -f rtorrent
 ==> log/execute.log <==
 
 ---
-^@sh -c echo >/app/rtorrent/session/rtorrent.pid 325
+sh -c echo >/app/rtorrent/session/rtorrent.pid 337
 ---
-^@
+
 --- Success ---
-^@
-==> log/rtorrent-1578502389.log <==
-1578502389 W Ignoring rtorrent.rc.
-1578502389 N rtorrent scgi: Starting thread.
-1578502389 N rtorrent main: Starting thread.
+
+==> log/rtorrent-.log <==
+1607004082 W Ignoring rtorrent.rc.
+1607004082 I listen port 49184 opened with backlog set to 128
+1607004082 D could not open input history file (path:/app/rtorrent/session/rtorrent.input_history)
+1607004082 N rtorrent main: Starting thread.
+1607004082 N rtorrent scgi: Starting thread.
+
+$ docker logs -f flood
+[s6-init] making user provided files available at /var/run/s6/etc...exited 0.
+[s6-init] ensuring user provided files have correct perms...exited 0.
+[fix-attrs.d] applying ownership & permissions fixes...
+[fix-attrs.d] done.
+[cont-init.d] executing container initialization scripts...
+[cont-init.d] 00-alpine-upgrade: executing...
+[*] Upgrading Alpine.
+[cont-init.d] 00-alpine-upgrade: exited 0.
+[cont-init.d] 02-fix-ownership: executing...
+[*] Fixing ownership.
+[*] Fixing permissions.
+[cont-init.d] 02-fix-ownership: exited 0.
+[cont-init.d] done.
+[services.d] starting services
+-----------------------------------------------
+   _             _  _                     _
+  | |           (_)| |                   | |
+  | | _ __ ___   _ | |  ___   ___  _ __  | |_
+  | || '_ \ _ \ | || | / __| / _ \| '_ \ | __|
+  | || | | | | || || || (__ |  __/| | | || |_
+  |_||_| |_| |_||_||_| \___| \___||_| |_| \__|
+
+-----------------------------------------------
+ Application : flood
+ Running user: flood
+ Base OS     : Alpine
+-----------------------------------------------
+ Flood configuration
+   - Installation path  : /app/flood
+   - Running as user    : flood
+   - UID & GID          : 9991
+   - Configuration file : /app/flood/config.json
+-----------------------------------------------
+[*] Starting Flood
+[services.d] done.
+Flood server starting on http://0.0.0.0:3000.
+
 ```
