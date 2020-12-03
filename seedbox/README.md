@@ -60,18 +60,15 @@ docker-compose build
 
 ## Before starting
 
-Import all secrets stored as system variables into `SECRET.env` for `bash` and `SECRET.fish.env` for `fish shell`, before starting the container.
-
-`SECRET.env` example:
+Create the file `SECRET.env`, edit it and import it before starting a container.
+Two example are present, `SECRET.env` for `bash` and `SECRET.fish.env` for `fish shell`.
 
 ```bash
+$ cp SECRET.example SECRET.env
+$ cat SECRET.env
 declare -x FLOOD_SECRET="long-random-password"
-```
-
-To import all secrets on the current bash:
-
-```bash
-. SECRET.env
+$ . SECRET.env
+$ docker-compose up -d
 ```
 
 
