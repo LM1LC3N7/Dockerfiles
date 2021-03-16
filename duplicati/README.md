@@ -52,7 +52,6 @@ Startup command, using `docker-compose up -d`:
 
 ```bash
 $ docker-compose logs -f
-Creating duplicati ... done
 Attaching to duplicati
 duplicati    | [s6-init] making user provided files available at /var/run/s6/etc...exited 0.
 duplicati    | [s6-init] ensuring user provided files have correct perms...exited 0.
