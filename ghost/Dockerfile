@@ -8,10 +8,10 @@
 # ----- Building ghost -----
 #
 
-FROM node:8-stretch as build
+FROM node:12-buster as build
 
 # https://github.com/TryGhost/Ghost/releases
-ENV GHOST_VER=3.2.0
+ENV GHOST_VER=3.37.1
 
 RUN echo \
  && echo "[*] Installing ghost dependencies" \
@@ -66,7 +66,9 @@ RUN echo \
 # Stage 2:
 # ----- Creating final image -----
 #
-FROM gcr.io/distroless/nodejs
+# Based on Node.js v10.16.3 (on april, 16)
+# https://github.com/GoogleContainerTools/distroless/blob/master/experimental/nodejs/README.md
+FROM gcr.io/distroless/nodejs:12
 
 ENV HOME=/ghost \
     NODE_ENV=production
@@ -82,5 +84,8 @@ EXPOSE 2368
 
 LABEL description="Ghost blog on distroless" \
       maintainer="Louis MILCENT <louis@lmilcent.com>"
+
+#HEALTHCHECK --interval=1m --timeout=3s \
+#  CMD curl -f http://localhost:2368/ || exit 1
 
 CMD ["index"]
