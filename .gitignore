@@ -1,2 +1,3 @@
 SECRET.env
+SECRET.fish.env
 .docker-compose.yml.swp
