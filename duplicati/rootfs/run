@@ -1,5 +1,8 @@
 #!/usr/bin/with-contenv sh
 
+UID=${UID:-8888}
+GID=${GID:-8888}
+
 # Init
 echo "-----------------------------------------------"
 echo "   _             _  _                     _ "
@@ -12,37 +15,53 @@ echo ""
 echo "-----------------------------------------------"
 echo " Application : Duplicati"
 echo " Running user: app"
+echo " User ID     : ${UID}"
+echo " Group ID    : ${GID}"
 echo " Base OS     : Debian"
 echo "-----------------------------------------------"
 echo " Duplicati configuration"
 echo "   - Config folder : /config"
 echo "-----------------------------------------------"
 
-echo "[*] Applying permissions to /apply-backup-group.sh"
-chmod +rx /apply-backup-group.sh
-# Allow user "app" to run the script as root
-echo "app     ALL= NOPASSWD: /bin/chgrp, /usr/bin/find, /bin/chmod" >> /etc/sudoers
-# Remove first sudo warning
-echo "Defaults        lecture = never" >> /etc/sudoers
+echo "[*] Applying setuid and permissions to /apply-backup-acl.sh"
+chown root:root /apply-backup-acl.sh
+chmod 4755 /apply-backup-acl.sh
+chmod u+s /apply-backup-acl.sh
 
-echo "[*] Applying permissions to /config"
-chown -R app:app /config
+echo "[*] Applying acl to /backups/*"
+export DUPLICATI__LOCALPATH="/backups"
+export DUPLICATI__EVENTNAME="BEFORE"
+export DUPLICATI__OPERATIONNAME="BACKUP"
+/apply-backup-acl.sh
 
-echo "[*] Applying permissions to /restore"
-chown -R app:1111 /restore
 
-# duplicati-backups really exist on the docker host
-# This allow the container to read some files and folders
-echo "[*] Applying permissions to /backups"
-groupadd --gid 1111 duplicati-backup
-chgrp -R duplicati-backup /backups
-usermod -G 1111 app
+echo "[*] Applying rights to /config/*"
+chown -R ${UID}:${GID} /config
 
+echo "[*] Applying acl to /restore/*"
+export DUPLICATI__LOCALPATH="/restore"
+/apply-backup-acl.sh
+
+
+# Unset duplicati default variables
+unset DUPLICATI__LOCALPATH
+unset DUPLICATI__EVENTNAME
+unset DUPLICATI__OPERATIONNAME
+
+# Erase old log file and restore permissions
+echo > /config/server.log
+chown ${UID}:${GID} /config/server.log
+
+# Start duplicati in background and show logs in console
 echo "[*] Starting Duplicati"
-# UID 991 = app
 cd /duplicati
-exec s6-setuidgid 991:1111 \
+exec s6-setuidgid ${UID}:${GID} \
   mono Duplicati.Server.exe \
   --webservice-interface=any \
   --server-datafolder=/config \
-  --webservice-allowed-hostnames=*
+  --webservice-allowed-hostnames=* \
+  --log-level=Information \
+  --log-file=/config/server.log  &
+
+exec s6-setuidgid ${UID}:${GID} \
+  tail -f /config/server.log

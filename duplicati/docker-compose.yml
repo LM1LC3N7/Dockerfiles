@@ -11,29 +11,12 @@ services:
 
     # Build Duplicati from last release
     # https://github.com/duplicati/duplicati/releases
-    image: lmilcent/duplicati:2.0.5.0-debian
-
-    # Container name
+    image: lmilcent/duplicati:2.0.5.114-debian
     container_name: duplicati
 
-
-    # -----------
-    # COMPILATION
-    # -----------
     build:
-        context: .
-        dockerfile: Dockerfile
-
-
-    # -------
-    # STARTUP
-    # -------
-
-    # Mode interactive
-    stdin_open: false
-
-    # Add a tty
-    tty: false
+      context: .
+      dockerfile: Dockerfile
 
     # no / always / on-failure / unless-stopped
     restart: unless-stopped
@@ -42,100 +25,77 @@ services:
     stop_grace_period: 15s
     stop_signal: SIGTERM
 
-
-    # ---------------------
-    # LABELS, ENV & VOLUMES
-    # ---------------------
-
     labels:
-      traefik.enable: true
-      traefik.frontend.rule: "Host:backup.lmilcent.com"
-      traefik.port: "8200"
-      traefik.backend: "duplicati"
+      # Base
+      traefik.enable: "true"
       traefik.docker.network: "proxy"
-      traefik.frontend.entryPoints: "http,https"
-      traefik.frontend.redirect.entryPoint: "https"
-      traefik.protocol: "http"
+      traefik.http.routers.duplicati.entrypoints: "websecure"
+      traefik.http.routers.duplicati.middlewares: "security@file, compression@file"
+      traefik.http.routers.duplicati.tls: "true"
+      traefik.http.routers.duplicati.tls.certresolver: "certMilcent"
 
-    # Environment variables
-    # For secrets with host environment variables
-    #environment: 
-    #  TEST_ENV_SECRET: ${ENV_SECRET}
-    # Public variables
-    env_file: default.env
-      
+      # Specific
+      traefik.http.routers.duplicati.rule: "Host(`backup.milcent.co`) || Host(`backup.lmilcent.com`)"
+      # Services
+      #traefik.http.services.duplicati.loadbalancer.server.port: 8200
+      #traefik.http.services.duplicati.loadbalancer.server.scheme: "http"
+
+    environment:
+      HOME: /config
+      DUPLICATI_HOME: /config
+      UID: 8888
+      GID: 8888
+  
     # Volumes
     volumes:
-      - duplicati-config:/config:rw
+      - /data/duplicati/config:/config:rw,z
       - /etc/localtime:/etc/localtime:ro
-      - /home/lmilcent:/backups/lmilcent:rw
-      - /home/adeloris:/backups/adeloris:rw
-      - /data/duplicati:/restore:rw
-      - /docker/volumes:/backups/docker/volumes:rw
-
-
-    # ---------
-    # RESOURCES
-    # ---------
+      # Path where backups can be restored (read & write)
+      - /data/duplicati/restore:/restore:rw,z
+      # Volumes to backup (rw for creating ACL)
+      - /home:/backups/home:rw
+      - /data:/backups/data:rw
+      - /root:/backups/root:rw
 
     # Limit resources
-    cpus: 2
-    mem_limit: 1024m
-    memswap_limit: 1024m
-
-
-    # -------
-    # NETWORK
-    # -------
-    
-    # Expose port to linked services (internal only)
-    #expose:
-    
-    # Expose port to ALL
-    #ports:
+    cpus: 4
+    mem_limit: 2048m
+    memswap_limit: 2048m
 
     # Network
     networks:
       - proxy
-
-
-    # -----
-    # OTHER
-    # -----
-    
-    # Override entrypoints and command
-    #entrypoint: /bin/bash
-    #command: "printenv | grep TEST"
-
-
-    # --------
-    # SECURITY
-    # --------
     
     # Drop capabilities (man 7 capabilities for list)
+    # Or https://man.archlinux.org/man/capabilities.7
     # Should drop ALL by default
-    #cap_drop:
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN             # For chown (s6)
+      - FOWNER            # From chmod (s6 + ACL script)
+      - SETUID            # Start a program using a specific UID (run script + s6)
+      - SETGID            # Start a program using a specific GID (idem)
+      - KILL              # For kill (s6)
+      - DAC_OVERRIDE      # Allow root to bypass rwx permissions checks (s6)
+      #- NET_BIND_SERVICE # Bind ports < 1024
+      #- NET_ADMIN        # Network operations (change IP, route table, etc)
+      #- NET_RAW          # Used for transparent proxying
+      #- SYS_ADMIN        # Avoid do use this. Perform administrative operations
 
-    #cap_add:
-    #  - CAP_CHOWN
-    #  - CAP_FOWNER
+    pids_limit: 200       # Up to 50 pids during a backup task
 
+    # Real root rights needed for setfacl on host files
+    userns_mode: host
+
+    # Only to backup a protected directory like /root or /home
+    # Disable SELINUX for this container
+    security_opt:
+      - label:disable
 
 # ----------------------------
 # CREATION: NETWORKS & VOLUMES
 # ----------------------------
-volumes:
-  # Join an existing volume
-  duplicati-config:
-    name: duplicati-config
-
-  # Create a new volume
-  #duplicati-config:
-
 networks:
-  # Join an existing network
   proxy:
     name: proxy
-
-# To create a network
-#  proxy:
