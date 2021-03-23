@@ -32,8 +32,8 @@ services:
     # Volumes
     # To allow access to all files, create a ACL rule on host.
     # UID 9999 => 241071 on host if user namespace is enabled within Docker
-    # execute for (read only everywhere): setfact -R -m user:241071:rX /data && setfact -R -m group:241071:rX /data
-    # to reset ACL:  setfact -bn /data
+    # execute for (read only everywhere): setfacl -R -m user:241071:rX /data && setfacl -R -m group:241071:rX /data
+    # to reset ACL:  setfacl -bn /data
     volumes:
       - /data/syncthing/appdata/config:/config:z
       - /data:/data:z
