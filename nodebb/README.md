@@ -21,10 +21,10 @@ docker images <image>:<tag>
 * **Base image:** node:12-alpine
 * **NodeBB version:** Last version available on GitHub (master branch)
 * **Multi-stage:** Yes
-* **Layers:** 10
-* **Size:** 563 Mio (including 453Mio for dependencies)
+* **Layers:** 9
+* **Size:** 578 Mio (including all plugins dependencies)
 * **Supervisor:** Yes (s6-overlay)
-* **Startup time:** 40 to 60 seconds (depend on the build time and plugins number)
+* **Startup time:** 25 seconds (depend on the build time and plugins number, value for a 4 cores CPU)
 * **Auto-restart:** yes
 * **Time Synchronization** yes
 * **Hardware limitations:** 4 CPU, 1512 Mio RAM, no SWAP

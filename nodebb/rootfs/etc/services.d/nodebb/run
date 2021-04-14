@@ -40,6 +40,10 @@ fi
 
 # Start NodeBB with lower rights
 echo "[*] Starting Nodebb"
-exec s6-setuidgid nodebb \
+s6-setuidgid nodebb \
   node ./nodebb start
+
+# Showing logs
+exec s6-setuidgid nodebb \
+  node ./nodebb log
 

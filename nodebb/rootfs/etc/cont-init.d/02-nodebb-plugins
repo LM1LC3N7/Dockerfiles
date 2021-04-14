@@ -1,0 +1,41 @@
+#!/usr/bin/with-contenv sh
+
+cd /nodebb
+
+# List installed plugins (extracted from nodebb db)
+s6-setuidgid nodebb \
+  node ./nodebb plugins | tail -n +2 | cut -c4- | sed -r 's/( .*$)//g' > /tmp/plugins.txt
+
+i=1
+toInstallTotal=0
+
+# Get total number of plugin to install
+while read plugin ; do
+  toInstall=$(find node_modules -type d -maxdepth 1 -name "${plugin%@*}" | wc -l)
+  if [ ${toInstall} -eq 0 ] ; then
+    let "toInstallTotal+=1"
+  fi
+done < /tmp/plugins.txt
+
+
+echo && echo "[*] Installing ${toInstallTotal} missing NodeBB plugins"
+
+while read plugin ; do
+
+  # Remove version tag to search folders
+  toInstall=$(find node_modules -type d -maxdepth 1 -name "${plugin%@*}" | wc -l)
+
+  # Install only if not already present
+  if [ ${toInstall} -eq 0 ] ; then
+    echo "  -- Installing ${i} / ${toInstallTotal}: ${plugin}"
+    s6-setuidgid nodebb \
+      npm install ${plugin} > /dev/null
+
+    let "i+=1"
+
+  # Module already installed
+  else
+    echo "  -- Plugin already installed: ${plugin}"
+  fi
+
+done < /tmp/plugins.txt

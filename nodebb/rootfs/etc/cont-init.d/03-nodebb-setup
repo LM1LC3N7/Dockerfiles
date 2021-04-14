@@ -1,5 +1,7 @@
 #!/usr/bin/with-contenv sh
+
 cd /nodebb
+
 echo "[*] Starting NodeBB setup"
 exec s6-setuidgid nodebb \
   ./nodebb setup | tee /nodebb/logs/setup.log

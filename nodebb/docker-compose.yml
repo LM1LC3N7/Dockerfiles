@@ -46,15 +46,19 @@ services:
     # LABELS, ENV & VOLUMES
     # ---------------------
 
+
+
     labels:
-      traefik.enable: true
-      traefik.frontend.rule: Host:${NODEBB_TRAEFIK_URL}
-      traefik.port: "4567"
-      traefik.backend: "NodeBB"
+      # Base
+      traefik.enable: "true"
       traefik.docker.network: "proxy"
-      traefik.frontend.entryPoints: "http,https"
-      traefik.frontend.redirect.entryPoint: "https"
-      traefik.protocol: "http"
+      traefik.http.routers.nodebb.entrypoints: "websecure"
+      traefik.http.routers.nodebb.middlewares: "security@file, compression@file"
+      traefik.http.routers.nodebb.tls: "true"
+      traefik.http.routers.nodebb.tls.certresolver: "certMilcent"
+
+      # Specific
+      traefik.http.routers.nodebb.rule: "Host(`leclos.milcent.co`) || Host(`leclos.lmilcent.com`)"
 
     environment:
       - REDIS_PASSWORD=${NODEBB_REDIS_PASSWORD}
@@ -91,8 +95,8 @@ services:
     # -----
     
     # Override entrypoints and command
-    #entrypoint: /bin/bash
-    #command: "printenv | grep TEST"
+    #entrypoint: /bin/sh
+    #command: "/bin/sh"
 
 
     # --------
