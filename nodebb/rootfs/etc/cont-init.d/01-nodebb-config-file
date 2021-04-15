@@ -1,18 +1,43 @@
 #!/usr/bin/with-contenv sh
 
-echo "[*] Checking NodeBB user configuration file."
+# URL AUTO GEN PASSWORD FOR COOKIE IF NOT PROVIDED AND NO CONFIG FILE
 
+COOKIE="${NODEBB_COOKIE_SECRET}"
+URL="${NODEBB_TRAEFIK_URL}"
+REDIS="${NODEBB_REDIS_PASSWORD}"
+
+# Check config.json, use the user one or a default one.
+echo "[*] Checking NodeBB user configuration file."
 if [ -e /etc/nodebb/config.json ] ; then
-  echo "-> User configuration file detected"
+  echo "  -- INFO: User configuration file detected, using it now."
   rm -f /nodebb/config.json
   ln -s /etc/nodebb/config.json /nodebb/config.json
 fi
 
-# Replace password in config.json if an environment password is set
-echo "[*] Updating ENV redis password in configuration file"
-
-if [ ${#REDIS_PASSWORD} -eq 0  ] ; then
-  REDIS_PASSWORD=""
+# Replace cookie secret in config.json
+echo "[*] Updating URL in configuration file."
+if [ ${#URL} -eq 0  ] ; then
+  echo "  -- WARNING: No URL found in env, configuration file will be not updated."
+else
+  sed -i "s/url.*/url\": \"$URL\",/g" /nodebb/config.json
 fi
 
-sed -i "s/password.*/password\": \"$REDIS_PASSWORD\",/g" /nodebb/config.json
+
+# Replace password in config.json
+echo "[*] Updating redis password in configuration file."
+if [ ${#REDIS} -eq 0  ] ; then
+  REDIS="$(openssl rand -base64 32)"
+  echo "  -- WARNING: No Redis password found in env, generating a random one."
+fi
+sed -i "s/password.*/password\": \"$REDIS\",/g" /nodebb/config.json
+
+
+# Replace cookie secret in config.json
+echo "[*] Updating cookie secret password in configuration file."
+if [ ${#COOKIE} -eq 0  ] ; then
+  COOKIE="$(openssl rand -base64 32)"
+  echo "  -- WARNING: No Cookie secret password found in env, generating a random one."
+fi
+sed -i "s/secret.*/secret\": \"$COOKIE\",/g" /nodebb/config.json
+
+
