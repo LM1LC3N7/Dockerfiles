@@ -61,7 +61,9 @@ services:
       traefik.http.routers.nodebb.rule: "Host(`leclos.milcent.co`) || Host(`leclos.lmilcent.com`)"
 
     environment:
-      - REDIS_PASSWORD=${NODEBB_REDIS_PASSWORD}
+      - NODEBB_REDIS_PASSWORD=${NODEBB_REDIS_PASSWORD}
+      - NODEBB_TRAEFIK_URL=${NODEBB_TRAEFIK_URL}
+      - NODEBB_COOKIE_SECRET=${NODEBB_COOKIE_SECRET}
 
     # Volumes
     volumes:

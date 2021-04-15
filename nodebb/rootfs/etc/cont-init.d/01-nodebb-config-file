@@ -19,17 +19,16 @@ echo "[*] Updating URL in configuration file."
 if [ ${#URL} -eq 0  ] ; then
   echo "  -- WARNING: No URL found in env, configuration file will be not updated."
 else
-  sed -i "s/url.*/url\": \"$URL\",/g" /nodebb/config.json
+  sed -i "s/url.*/url\": \"${URL}\",/g" /nodebb/config.json
 fi
 
 
 # Replace password in config.json
 echo "[*] Updating redis password in configuration file."
 if [ ${#REDIS} -eq 0  ] ; then
-  REDIS="$(openssl rand -base64 32)"
-  echo "  -- WARNING: No Redis password found in env, generating a random one."
+  echo "  -- WARNING: No Redis password found, the redis DB can be easily hacked!"
 fi
-sed -i "s/password.*/password\": \"$REDIS\",/g" /nodebb/config.json
+sed -i "s/password.*/password\": \"${REDIS}\",/g" /nodebb/config.json
 
 
 # Replace cookie secret in config.json
@@ -38,6 +37,6 @@ if [ ${#COOKIE} -eq 0  ] ; then
   COOKIE="$(openssl rand -base64 32)"
   echo "  -- WARNING: No Cookie secret password found in env, generating a random one."
 fi
-sed -i "s/secret.*/secret\": \"$COOKIE\",/g" /nodebb/config.json
-
+#sed -i 's/secret.*/secret": "'${COOKIE}'",/g' /nodebb/config.json
+sed -i '/secret/c\  "secret": "'"${COOKIE}"'",' /nodebb/config.json
 

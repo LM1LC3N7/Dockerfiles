@@ -13,6 +13,7 @@ ENV NODE_ENV=production \
 WORKDIR /nodebb
 
 COPY rootfs/etc/nodebb/active-plugins /tmp/active-plugins
+COPY rootfs/nodebb/config.json /tmp/config.json
 
 RUN echo \
  && echo "[*] Installing build dependencies" \
@@ -55,10 +56,10 @@ RUN echo \
  && cd /tmp && wget -q https://github.com/NodeBB/NodeBB/archive/refs/tags/${NODEBB_VER}.zip \
  && echo \
  && echo "[*] Installing NodeBB" \
- && unzip -qq /tmp/${NODEBB_VER}.zip -d /tmp/nodebb && echo && ls -alh && cd nodebb &&  pwd && ls -alh \
+ && unzip -qq /tmp/${NODEBB_VER}.zip -d /tmp/nodebb \
  && rm -rf /nodebb/.wget* \
  && mv /tmp/nodebb/NodeBB-*/* /nodebb \
- && cd /nodebb && echo && echo && ls -alh && echo && echo \
+ && cd /nodebb \
  && echo \
  && echo "[*] Installing NodeBB" \
  && ./nodebb setup \
@@ -67,6 +68,8 @@ RUN echo \
  && while read plugin ; do echo ; echo "  [*] Installing ${plugin}" ; npm install ${plugin} ; done < /tmp/active-plugins \
  && rm /tmp/active-plugins \
  && npm cache clean --force \
+ && echo && echo "[*] Copying the user NodeBBconfig file." \
+ && cp /tmp/config.json /nodebb \
  && echo \
  && echo "[*] Cleaning build apps." \
  && apk del TMP \
