@@ -67,6 +67,7 @@ RUN echo \
  && echo "[*] Installing NodeBB plugins" \
  && while read plugin ; do echo ; echo "  [*] Installing ${plugin}" ; npm install ${plugin} ; done < /tmp/active-plugins \
  && rm /tmp/active-plugins \
+ && npm update \
  && npm cache clean --force \
  && echo && echo "[*] Copying the user NodeBBconfig file." \
  && cp /tmp/config.json /nodebb \
