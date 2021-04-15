@@ -39,3 +39,24 @@ while read plugin ; do
   fi
 
 done < /tmp/plugins.txt
+
+#
+# QUIL COMPOSER PLUGIN
+#
+# ISSUE: https://github.com/NodeBB/nodebb-plugin-composer-quill/issues/176
+# Until NodeBB version < 1.17.x, the module should stay at specific version
+INSTALLED_VERSION=$(cat /nodebb/package.json | grep -m1 version | cut -d '"' -f 4)
+X_X=$(echo "$INSTALLED_VERSION" | cut -d '.' -f 1)
+X_X_X=$(echo "${INSTALLED_VERSION}" | cut -d '.' -f 2)
+
+# If v1.x
+if [[ ${X_X} -le 1 ]] ; then
+  # if v1.16.x
+  if [[ ${X_X_X} -le 16 ]] ; then
+    echo && echo " [*] WARNING: NodeBB version < 1.17.0, \"nodebb-plugin-composer-quill\" plugin is only compatible in version 1.8.0."
+    echo "  -- Deleting the current plugin."
+    npm remove nodebb-plugin-composer-quill > /dev/null
+    echo "  -- Installing the plugin in correct version."
+    npm install nodebb-plugin-composer-quill@1.8.0 > /dev/null
+  fi
+fi
