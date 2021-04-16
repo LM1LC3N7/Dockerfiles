@@ -21,10 +21,10 @@ docker images <image>:<tag>
 * **Base image:** node:12-alpine
 * **NodeBB version:** Last version available on GitHub (master branch)
 * **Multi-stage:** Yes
-* **Layers:** 9
-* **Size:** 578 Mio (including all plugins dependencies)
+* **Layers:** 10
+* **Size:** 591 Mio (including all plugins dependencies)
 * **Supervisor:** Yes (s6-overlay)
-* **Startup time:** 25 seconds (depend on the build time and plugins number, value for a 4 cores CPU)
+* **Startup time:** 35 seconds (depend on the build time and plugins number, value for a 4 cores CPU)
 * **Auto-restart:** yes
 * **Time Synchronization** yes
 * **Hardware limitations:** 4 CPU, 1512 Mio RAM, no SWAP
@@ -87,33 +87,27 @@ Note: The redis password will automatically be updated by the environment variab
 ```
 
 **active-plugins**
+File only used during the **image build**. Two other files are used to keep a list of enabled and disabled plugins accross container (re) creations.
 
 ```bash
-nodebb-plugin-2factor
-nodebb-plugin-browsing-users
-nodebb-plugin-composer-default
-nodebb-plugin-custom-homepage
-nodebb-plugin-dbsearch
-nodebb-plugin-emoji
-nodebb-plugin-emoji-android
-nodebb-plugin-emoji-one
-nodebb-plugin-iframely
-nodebb-plugin-imagemagick
-nodebb-plugin-markdown
-nodebb-plugin-mentions
-nodebb-plugin-recent-cards
-nodebb-plugin-registration-notification
-nodebb-plugin-soundpack-default
-nodebb-plugin-spam-be-gone
-nodebb-plugin-sso-facebook
-nodebb-plugin-sso-google
-nodebb-plugin-tenor-gif
-nodebb-rewards-essentials
-nodebb-theme-lavender
-nodebb-theme-persona
-nodebb-theme-slick
-nodebb-theme-vanilla
-nodebb-widget-essentials
+nodebb-plugin-category-notifications@3.0.3
+nodebb-plugin-category-optin@2.0.0
+nodebb-plugin-composer-quill@1.8.0
+nodebb-plugin-dbsearch@4.2.0
+nodebb-plugin-embed@3.0.19
+nodebb-plugin-emoji@3.5.1
+nodebb-plugin-emoji-one@2.0.5
+nodebb-plugin-imagemagick@2.1.1
+nodebb-plugin-lastlife-registration-question@0.1.0
+nodebb-plugin-mentions@2.13.9
+nodebb-plugin-private-forum@1.2.0
+nodebb-plugin-question-and-answer@0.8.7
+nodebb-plugin-registration-notification@1.2.5
+nodebb-plugin-telegram-notifications-plus@1.0.4
+nodebb-rewards-essentials@0.1.4
+nodebb-theme-persona@10.3.19
+nodebb-widget-essentials@5.0.3
+nodebb-widget-search-bar@1.1.2
 ```
 
 ## Start
