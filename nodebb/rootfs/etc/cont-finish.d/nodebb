@@ -1,14 +1,31 @@
 #!/usr/bin/with-contenv sh
 
+# Script called for shutdown
+
 cd /nodebb
 
-# Script called for shutdown
-echo "[*] Shutting down NodeBB with NodeBB cli"
-exec s6-setuidgid nodebb \
-  node ./nodebb stop
+s6-setuidgid nodebb node ./nodebb plugins > /tmp/plugins
 
-# Backup config file if modified
-[ -e /etc/nodebb/config.json ] || cp /opt/nodebb/config.json /etc/nodebb/config.json
-echo "[*] NodeBB Stopped"
+# 1 - Save current enabled plugins
+echo && echo "[*] Saving current enabled plugins."
+cat /tmp/plugins | grep "enabled" | tail -n +2 | cut -c4- | sed -r 's/( .*$)//g' > /etc/nodebb/enabled-plugins
+
+# 2 - Save current disabled plugins
+echo && echo "[*] Saving current disabled plugins."
+cat /tmp/plugins | grep "disabled" | tail -n +2 | cut -c4- | sed -r 's/( .*$)//g' > /etc/nodebb/disabled-plugins
+
+# 3 - Shut down NodeBB
+echo && echo "[*] Shutting down NodeBB with NodeBB cli"
+exec s6-setuidgid nodebb \
+  node ./nodebb stop && \
+  echo && echo "[*] NodeBB Stopped"
+
+# 4 - Backup config file
+if [ -e /nodebb/config.json ] ; then
+  echo && echo "[*] Backuping nodebb config file."
+  cp /nodebb/config.json /etc/nodebb/config.json
+fi
+
+echo && echo "[*] All good! Exiting."
 
 exit 0

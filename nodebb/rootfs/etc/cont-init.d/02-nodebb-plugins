@@ -3,31 +3,29 @@
 cd /nodebb
 
 # List installed plugins (extracted from nodebb db)
-s6-setuidgid nodebb \
-  node ./nodebb plugins | tail -n +2 | cut -c4- | sed -r 's/( .*$)//g' > /tmp/plugins.txt
+#s6-setuidgid nodebb \
+#  node ./nodebb plugins | tail -n +2 | cut -c4- | sed -r 's/( .*$)//g' > /tmp/plugins.txt
 
 i=1
+j=1
 toInstallTotal=0
+toDisableTotal=0
 
-# Get total number of plugin to install
-while read plugin ; do
-  toInstall=$(find node_modules -type d -maxdepth 1 -name "${plugin%@*}" | wc -l)
-  if [ ${toInstall} -eq 0 ] ; then
-    let "toInstallTotal+=1"
-  fi
-done < /tmp/plugins.txt
+# Get total number of plugin to install and enable
+toInstallTotal=$(cat /etc/nodebb/enabled-plugins | wc -l)
+# Get total number of plugin to disable
+toDisableTotal=$(cat /etc/nodebb/disabled-plugins | wc -l)
 
 
+# Installing "enabled" plugins
 echo && echo "[*] Installing ${toInstallTotal} missing NodeBB plugins"
-
 while read plugin ; do
-
   # Remove version tag to search folders
   toInstall=$(find node_modules -type d -maxdepth 1 -name "${plugin%@*}" | wc -l)
 
   # Install only if not already present
   if [ ${toInstall} -eq 0 ] ; then
-    echo "  -- Installing ${i} / ${toInstallTotal}: ${plugin}"
+    echo "  -- ${i} / ${toInstallTotal}: Installing ${plugin}"
     s6-setuidgid nodebb \
       npm install ${plugin} > /dev/null
 
@@ -35,16 +33,34 @@ while read plugin ; do
 
   # Module already installed
   else
-    echo "  -- Plugin already installed: ${plugin}"
+    echo "  -- ${i} / ${toInstallTotal}: Plugin already present (${plugin})"
   fi
+done < /etc/nodebb/enabled-plugins
 
-done < /tmp/plugins.txt
+
+# Disabling "disabled" plugins
+echo && echo "[*] Disabling ${toDisableTotal} NodeBB plugins, according to last plugins list export."
+while read plugin ; do
+  echo && echo "  -- Disabling ${j} / ${toDisableTotal} plugins: ${plugin%@*}"
+  s6-setuidgid nodebb node ./nodebb reset -p "${plugin%@*}"
+
+  let "j+=1"
+done < /etc/nodebb/disabled-plugins
+
+
 
 #
 # QUIL COMPOSER PLUGIN
 #
 # ISSUE: https://github.com/NodeBB/nodebb-plugin-composer-quill/issues/176
 # Until NodeBB version < 1.17.x, the module should stay at specific version
+
+# If quill module is not present in nodebb plugins
+if [ "$(./nodebb plugins | grep quill | wc -l)" -eq 0 ] ; then
+  exit 0
+fi
+
+# Else check the installed version according to the nodebb current version.
 INSTALLED_VERSION=$(cat /nodebb/package.json | grep -m1 version | cut -d '"' -f 4)
 X_X=$(echo "$INSTALLED_VERSION" | cut -d '.' -f 1)
 X_X_X=$(echo "${INSTALLED_VERSION}" | cut -d '.' -f 2)
