@@ -19,8 +19,8 @@ docker image inspect <image> -f '{{.RootFS.Layers}}' | wc -w
 docker images <image>:<tag>
 -->
 
-* **Base image:** node:12-alpine
-* **NodeBB version:** Last version available on GitHub (master branch)
+* **Base image:** node:14-alpine
+* **NodeBB version:** Last version available on GitHub (official release)
 * **Multi-stage:** Yes
 * **Layers:** 10
 * **Size:** 591 Mio (including all plugins dependencies)
