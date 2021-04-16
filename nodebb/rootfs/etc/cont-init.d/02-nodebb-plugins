@@ -29,12 +29,13 @@ while read plugin ; do
     s6-setuidgid nodebb \
       npm install ${plugin} > /dev/null
 
-    let "i+=1"
-
   # Module already installed
   else
     echo "  -- ${i} / ${toInstallTotal}: Plugin already present (${plugin})"
   fi
+
+  # Increment
+  let "i+=1"
 done < /etc/nodebb/enabled-plugins
 
 
