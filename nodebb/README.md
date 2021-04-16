@@ -1,6 +1,7 @@
 # NodeBB
 
 NodeBB is the "next generation forum". It utilizes web sockets for instant interactions and real-time notifications.
+
 This image:
 * allow to use the `restart` and `build` buttons from NodeBB web interface
 * start NodeBB with users rights (not as root)
