@@ -10,28 +10,10 @@ services:
   netdata:
 
     # Download the image or build it
-    image: lmilcent/netdata:1.19.0
+    image: netdata/netdata:latest
+    #image: lmilcent/netdata
 
-    # Container name
     container_name: netdata
-
-
-    # -----------
-    # COMPILATION
-    # -----------
-    build:
-       # Path of build file and name
-       context: .
-       dockerfile: Dockerfile
-        
-
-    # -------
-    # STARTUP
-    # -------
-
-    # Mode interactive
-    stdin_open: false
-    tty: false
 
     # no / always / on-failure / unless-stopped
     restart: unless-stopped
@@ -40,85 +22,76 @@ services:
     stop_grace_period: 5s
     stop_signal: SIGTERM
 
-
-    # --------------------
-    # VOLUME & ENV & LABEL
-    # --------------------
-
     # Environment variables
-    #environment: 
-    #env_file: default.env
+    environment: 
+      DO_NOT_TRACK: 1
+      TZ: Europe/Paris
 
-    # Labels
     labels:
-      traefik.enable: true
-      traefik.frontend.rule: "Host:monitoring.lmilcent.com"
-      traefik.port: "19999"
-      traefik.backend: "netdata"
+      # Base
+      traefik.enable: "true"
       traefik.docker.network: "proxy"
-      traefik.frontend.entryPoints: "http,https"
-      traefik.frontend.redirect.entryPoint: "https"
-      traefik.protocol: "http"
-      traefik.frontend.auth.basic.users: "monitoring:${NETDATA_BASIC_AUTH}"
+      traefik.http.routers.netdata.entrypoints: "websecure"
+      traefik.http.routers.netdata.middlewares: "security@file, compression@file"
+      traefik.http.routers.netdata.tls: "true"
+      traefik.http.routers.netdata.tls.certresolver: "certMilcent"
+
+      # Specific
+      traefik.http.routers.netdata.rule: "Host(`monitoring.milcent.co`) || Host(`monitoring.lmilcent.com`)"
+      traefik.http.routers.netdata.middlewares: "netdata-auth"
+      traefik.http.middlewares.netdata-auth.basicauth.users: "monitoring:${NETDATA_BASIC_AUTH}"
 
     # Volumes
     volumes:
-      - /etc/localtime:/etc/localtime:ro
+      - netdata-lib:/var/lib/netdata:rw
+      - netdata-cache:/var/cache/netdata:rw
+      - netdata-config:/etc/netdata:rw
+      - /dev/mapper:/host/dev/mapper:ro
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/shadow:/host/etc/shadow:ro
       - /etc/group:/host/etc/group:ro
-      - /etc/os-release:/host/etc/os-release:ro
-      - /proc:/host/proc:ro
+      #- /proc:/host/proc:ro
       - /sys:/host/sys:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-
-
-    # ---------
-    # RESOURCES
-    # ---------
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/run/docker.sock:/host/var/run/docker.sock:ro
 
     # Limit resources
-    cpus: 0.5
-    mem_limit: 250m
-    memswap_limit: 250m
+    cpus: 2
+    mem_limit: 512m
+    memswap_limit: 512m
 
-
-    # -------
-    # NETWORK
-    # -------
-    
     # Network
     networks:
       - proxy
 
-
-    # -----
-    # OTHER
-    # -----
-    
-    # Override entrypoints and command
-    #entrypoint: /bin/bash
-    #command: "printenv | grep TEST"
-
-
-    # --------
-    # SECURITY
-    # --------
-    
     # Drop capabilities (man 7 capabilities for list)
-    cap_drop:
-      - ALL
+#    cap_drop:
+#      - ALL
     cap_add:
-      - CHOWN
-      - FSETID
-      - SETGID
-      - SETUID
-      - DAC_OVERRIDE
-      - SYS_PTRACE
-
+       - SYS_PTRACE
+#      - CHOWN
+#      - FSETID
+#      - SETGID
+#      - SETUID
+#      - DAC_OVERRIDE
+#      - SYS_PTRACE
+    #userns_mode: host
+    #privileged: true
+    security_opt:
+      - apparmor:unconfined 
+      - no-new-privileges=false
 
 # --------
 # NETWORKS
 # --------
 networks:
-  # Connect to existing network
   proxy:
     name: proxy
+
+volumes:
+  netdata-config:
+    name: netdata-config
+  netdata-cache:
+    name: netdata-cache
+  netdata-lib:
+    name: netdata-lib

@@ -1,5 +1,8 @@
 # Netdata
 
+**Note:** Now Netdata is installed without Docker on my server. This allow to add more visibility on partitions, free disk space &co.
+I am sure this could be done through the Docker image, but it is simplier to install Netdata directly on the host OS.
+
 Netdata is distributed, real-time, performance and health monitoring for systems and applications. It is a highly optimized monitoring agent you install on all your systems and containers. This project is available on [GitHub](https://github.com/netdata/netdata/).
 
 
